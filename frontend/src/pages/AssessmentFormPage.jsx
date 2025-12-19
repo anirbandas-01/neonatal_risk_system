@@ -1,0 +1,522 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import InputField from '../components/InputField';
+import SelectField from '../components/SelectField';
+import { validateField, validateForm, validationRanges, normalRanges } from '../utils/validation';
+import { generateBabyId } from '../utils/helpers';
+import { assessmentAPI } from '../services/api';
+
+function AssessmentFormPage() {
+  const navigate = useNavigate();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    babyId: generateBabyId(),
+    birthWeight: '',
+    birthLength: '',
+    headCircumference: '',
+    temperature: '',
+    heartRate: '',
+    respiratoryRate: '',
+    jaundiceLevel: '',
+    bloodGlucose: '',
+    oxygenSaturation: '',
+    apgarScore: '',
+    birthDefects: '',
+    normalReflexes: '',
+    immunizations: '',
+    doctorNotes: ''
+  });
+  
+  // Errors state
+  const [errors, setErrors] = useState({});
+  
+  // Loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Success state
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Handle input change with validation
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Validate field if it has validation rules
+    if (validationRanges[name]) {
+      const validation = validateField(name, value);
+      
+      if (!validation.isValid) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: validation.message
+        }));
+      } else {
+        // Remove error if valid
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate entire form
+    const validation = validateForm(formData);
+    
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      // Scroll to first error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Prepare data for API
+      const assessmentData = {
+        babyId: formData.babyId,
+        healthParameters: {
+          birthWeight: parseFloat(formData.birthWeight),
+          birthLength: parseFloat(formData.birthLength),
+          headCircumference: parseFloat(formData.headCircumference),
+          temperature: parseFloat(formData.temperature),
+          heartRate: parseFloat(formData.heartRate),
+          respiratoryRate: parseFloat(formData.respiratoryRate),
+          jaundiceLevel: parseFloat(formData.jaundiceLevel),
+          bloodGlucose: parseFloat(formData.bloodGlucose),
+          oxygenSaturation: parseFloat(formData.oxygenSaturation),
+          apgarScore: parseInt(formData.apgarScore),
+          birthDefects: formData.birthDefects,
+          normalReflexes: formData.normalReflexes,
+          immunizations: formData.immunizations
+        },
+        doctorNotes: formData.doctorNotes
+      };
+      
+      // Call API
+        const response = await assessmentAPI.createAssessment(assessmentData);
+
+        console.log('Assessment created:', response);
+        setSubmitSuccess(true);
+
+        // Navigate to results page with data after 1.5 seconds
+        setTimeout(() => {
+          navigate('/results', { 
+            state: { 
+              assessmentData: response.data 
+            } 
+          });
+        }, 1500);
+      
+    } catch (error) {
+      console.error('Error creating assessment:', error);
+      setErrors({
+        submit: error.message || 'Failed to create assessment. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reset form
+  const handleReset = () => {
+    setFormData({
+      babyId: generateBabyId(),
+      birthWeight: '',
+      birthLength: '',
+      headCircumference: '',
+      temperature: '',
+      heartRate: '',
+      respiratoryRate: '',
+      jaundiceLevel: '',
+      bloodGlucose: '',
+      oxygenSaturation: '',
+      apgarScore: '',
+      birthDefects: '',
+      normalReflexes: '',
+      immunizations: '',
+      doctorNotes: ''
+    });
+    setErrors({});
+    setSubmitSuccess(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center text-blue-600 hover:text-blue-700 mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Home
+          </button>
+          
+          <div className="bg-cyan-400 rounded-xl shadow-lg p-6">
+            <h1 className="text-3xl font-bold text-white flex items-center">
+              👶 Newborn Health Monitor
+            </h1>
+            <p className="text-white mt-2">
+              AI-Powered Risk Assessment for Neonatal Care
+            </p>
+          </div>
+        </div>
+
+        {/* Success Message */}
+        {submitSuccess && (
+          <div className="mb-6 bg-green-100 border-2 border-green-500 rounded-lg p-4 flex items-center">
+            <svg className="w-6 h-6 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="font-semibold text-green-800">Assessment Created Successfully!</p>
+              <p className="text-sm text-green-700">Redirecting to dashboard...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {errors.submit && (
+          <div className="mb-6 bg-red-100 border-2 border-red-500 rounded-lg p-4 flex items-center">
+            <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
+            <div>
+              <p className="font-semibold text-red-800">Error</p>
+              <p className="text-sm text-red-700">{errors.submit}</p>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left Column - Health Parameters Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-6">
+                  Newborn Health Parameters
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  Enter the clinical measurements for risk assessment
+                </p>
+
+                {/* Baby ID (Read-only) */}
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Baby ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.babyId}
+                    disabled
+                    className="w-full px-4 py-2 bg-gray-100 border-2 border-gray-300 rounded-lg text-gray-700 font-mono"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Auto-generated unique identifier</p>
+                </div>
+
+                {/* Birth Measurements Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
+                    Birth Measurements
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Birth Weight"
+                      name="birthWeight"
+                      value={formData.birthWeight}
+                      onChange={handleInputChange}
+                      error={errors.birthWeight}
+                      placeholder="3.2"
+                      unit="kg"
+                      min={normalRanges.birthWeight.min}
+                      max={normalRanges.birthWeight.max}
+                    />
+                    
+                    <InputField
+                      label="Birth Length"
+                      name="birthLength"
+                      value={formData.birthLength}
+                      onChange={handleInputChange}
+                      error={errors.birthLength}
+                      placeholder="50"
+                      unit="cm"
+                      min={normalRanges.birthLength.min}
+                      max={normalRanges.birthLength.max}
+                    />
+                  </div>
+
+                  <InputField
+                    label="Head Circumference"
+                    name="headCircumference"
+                    value={formData.headCircumference}
+                    onChange={handleInputChange}
+                    error={errors.headCircumference}
+                    placeholder="34"
+                    unit="cm"
+                    min={normalRanges.headCircumference.min}
+                    max={normalRanges.headCircumference.max}
+                  />
+                </div>
+
+                {/* Vital Signs Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
+                    Vital Signs
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Temperature"
+                      name="temperature"
+                      value={formData.temperature}
+                      onChange={handleInputChange}
+                      error={errors.temperature}
+                      placeholder="36.8"
+                      unit="°C"
+                      min={normalRanges.temperature.min}
+                      max={normalRanges.temperature.max}
+                    />
+                    
+                    <InputField
+                      label="Heart Rate"
+                      name="heartRate"
+                      value={formData.heartRate}
+                      onChange={handleInputChange}
+                      error={errors.heartRate}
+                      placeholder="140"
+                      unit="bpm"
+                      min={normalRanges.heartRate.min}
+                      max={normalRanges.heartRate.max}
+                      step="1"
+                    />
+                    
+                    <InputField
+                      label="Respiratory Rate"
+                      name="respiratoryRate"
+                      value={formData.respiratoryRate}
+                      onChange={handleInputChange}
+                      error={errors.respiratoryRate}
+                      placeholder="45"
+                      unit="bpm"
+                      min={normalRanges.respiratoryRate.min}
+                      max={normalRanges.respiratoryRate.max}
+                      step="1"
+                    />
+                    
+                    <InputField
+                      label="Oxygen Saturation"
+                      name="oxygenSaturation"
+                      value={formData.oxygenSaturation}
+                      onChange={handleInputChange}
+                      error={errors.oxygenSaturation}
+                      placeholder="98"
+                      unit="%"
+                      min={normalRanges.oxygenSaturation.min}
+                      max={normalRanges.oxygenSaturation.max}
+                      step="1"
+                    />
+                  </div>
+                </div>
+
+                {/* Laboratory Values Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
+                    Laboratory Values
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Jaundice Level"
+                      name="jaundiceLevel"
+                      value={formData.jaundiceLevel}
+                      onChange={handleInputChange}
+                      error={errors.jaundiceLevel}
+                      placeholder="5.0"
+                      unit="mg/dL"
+                      min={normalRanges.jaundiceLevel.min}
+                      max={normalRanges.jaundiceLevel.max}
+                    />
+                    
+                    <InputField
+                      label="Blood Glucose"
+                      name="bloodGlucose"
+                      value={formData.bloodGlucose}
+                      onChange={handleInputChange}
+                      error={errors.bloodGlucose}
+                      placeholder="4.5"
+                      unit="mmol/L"
+                      min={normalRanges.bloodGlucose.min}
+                      max={normalRanges.bloodGlucose.max}
+                    />
+                  </div>
+                </div>
+
+                {/* Assessment Scores Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
+                    Assessment Scores
+                  </h3>
+                  
+                  <InputField
+                    label="APGAR Score"
+                    name="apgarScore"
+                    value={formData.apgarScore}
+                    onChange={handleInputChange}
+                    error={errors.apgarScore}
+                    placeholder="9"
+                    unit=""
+                    min={0}
+                    max={10}
+                    step="1"
+                  />
+                </div>
+
+                {/* Clinical Observations Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
+                    Clinical Observations
+                  </h3>
+                  
+                  <SelectField
+                    label="Birth Defects Present?"
+                    name="birthDefects"
+                    value={formData.birthDefects}
+                    onChange={handleInputChange}
+                    error={errors.birthDefects}
+                    options={[
+                      { value: 'No', label: 'No' },
+                      { value: 'Yes', label: 'Yes' },
+                      { value: 'Some distress', label: 'Some distress' }
+                    ]}
+                  />
+                  
+                  <SelectField
+                    label="Normal Reflexes?"
+                    name="normalReflexes"
+                    value={formData.normalReflexes}
+                    onChange={handleInputChange}
+                    error={errors.normalReflexes}
+                    options={[
+                      { value: 'Yes', label: 'Yes' },
+                      { value: 'No', label: 'No' }
+                    ]}
+                  />
+                  
+                  <SelectField
+                    label="Immunizations Completed?"
+                    name="immunizations"
+                    value={formData.immunizations}
+                    onChange={handleInputChange}
+                    error={errors.immunizations}
+                    options={[
+                      { value: 'Yes', label: 'Yes' },
+                      { value: 'No', label: 'No' }
+                    ]}
+                  />
+                </div>
+
+                {/* Doctor Notes */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Doctor's Notes
+                  </label>
+                  <textarea
+                    name="doctorNotes"
+                    value={formData.doctorNotes}
+                    onChange={handleInputChange}
+                    placeholder="Additional observations, concerns, or recommendations..."
+                    rows="4"
+                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
+                  />
+                </div>
+
+              </div>
+            </div>
+
+            {/* Right Column - Action Panel */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Actions
+                </h3>
+                
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`
+                    w-full py-3 px-6 rounded-lg font-semibold mb-3
+                    flex items-center justify-center transition-all
+                    ${isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-cyan-400 hover:bg-cyan-500 text-white shadow-lg hover:shadow-xl'
+                    }
+                  `}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5 mr-2" />
+                      Assess Health Risk
+                    </>
+                  )}
+                </button>
+
+                {/* Reset Button */}
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={isSubmitting}
+                  className="w-full py-3 px-6 rounded-lg font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reset Form
+                </button>
+
+                {/* Info Box */}
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+                    <AlertCircle className="w-5 h-5 mr-2" />
+                    Important
+                  </h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• All fields are required</li>
+                    <li>• Values must be within valid ranges</li>
+                    <li>• Double-check measurements</li>
+                    <li>• AI will analyze risk level</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </form>
+
+      </div>
+    </div>
+  );
+}
+
+export default AssessmentFormPage;
