@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
 
 
 
-mongoose.connect(process.env.MONGODB_URI, {
+/* mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -73,7 +73,15 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => {
   console.error('❌ MongoDB connection error:', err.message);
   console.log('Make sure MongoDB is running!');
-});
+});  */
+ mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+  }); 
+
 
 // ===== START SERVER =====
 app.listen(PORT, () => {
