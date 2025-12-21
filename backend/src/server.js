@@ -60,20 +60,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-
-
-/* mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('✅ MongoDB connected successfully');
-  console.log('Database:', process.env.MONGODB_URI);
-})
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err.message);
-  console.log('Make sure MongoDB is running!');
-});  */
  mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected successfully');

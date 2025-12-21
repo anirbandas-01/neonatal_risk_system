@@ -23,7 +23,7 @@ exports.createAssessment = async (req, res) => {
         }
         
         console.log('Getting ML prediction ......');
-        const mlPrediction = await MLServices.predictionRisk(healthParameters);
+        const mlPrediction = await MLServices.predictRisk(healthParameters);
         console.log('ML Prediction:', mlPrediction);
         
         const recommendations = MLServices.generateRecommendations(mlPrediction.finalRisk, 
@@ -179,7 +179,7 @@ exports.deleteAssessment = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const Assessment = await Baby.findByIdAndDelete(id);
+        const assessment = await Baby.findByIdAndDelete(id);
 
         if(!assessment){
             return res.status(404).json({

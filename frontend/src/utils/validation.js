@@ -16,7 +16,7 @@ export const normalRanges = {
     birthLength: { min: 45, max:55 },
     headCircumference: { min: 32, max: 37 },
     temperature: {min: 36.5, max: 37.5 },
-    heartRate: { min: 120, max: 100 },
+    heartRate: { min: 120, max: 160 },
     respiratoryRate: { min: 30 , max: 60 },
     jaundiceLevel: { min: 0 , max: 5 },
     bloodGlucose: { min: 2.6 , max: 7.0 },
@@ -37,7 +37,7 @@ export const validateField = (fieldName, value) => {
             return { isValid: false, message: 'Please enter a valid number'};
         }
 
-        if (numValue , range.min || numValue > range.max) {
+        if (numValue < range.min || numValue > range.max) {
             return {
                 isValid: false,
                 message: `value must be between ${range.min} and ${range.max} ${range.unit}`

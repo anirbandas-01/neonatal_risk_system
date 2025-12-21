@@ -3,13 +3,13 @@ const axios = require('axios');
 const ML_MODEL_URL = process.env.ML_MODEL_URL || 'http://localhost:5000';
 
 class MLServices {
-    async predictRisk(HealthParameters){
+    async predictRisk(healthParameters){
         try {
             console.log('Calling ML Model API..');
             console.log('URL:',  `${ML_MODEL_URL}/predict`);
 
             const response = await axios.post(`${ML_MODEL_URL}/predict`, {
-                data: HealthParameters
+                data: healthParameters
             },{
                 timeout: 10000,
                 headers: {

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const babySchema = new mongoose.Schema({
-    BabyId: {
+    babyId: {
         type: String,
         required:true,
         unique:true,
@@ -12,7 +12,7 @@ const babySchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    HealthParameters: {
+    healthParameters: {
         birthWeight: {
             type: Number,
             required: true,
