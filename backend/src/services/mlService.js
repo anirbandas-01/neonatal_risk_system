@@ -25,7 +25,7 @@ class MLServices {
 
             if(error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT'){
                 console.log('ML Model not available. Using  fallback Prediction...');
-                return this.fallbackPrediction(HealthParameters);
+                return this.fallbackPrediction(healthParameters);
             }
 
             throw new Error('Failed to get prediction from ML Model');
