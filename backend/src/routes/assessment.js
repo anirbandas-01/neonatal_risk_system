@@ -1,20 +1,25 @@
 const express = require('express');
+
+const babyController = require('../controllers/baby.controller.js');
+const assessmentController = require('../controllers/assessment.controller.js');
+const statisticsController = require('../controllers/statistics.controller.js');
+
 const router = express.Router();
-const assessmentController = require('../controllers/assessmentController');
 
-// POST /api/assess - Create new assessment
-router.post('/assess', assessmentController.createAssessment);
 
-// GET /api/assess/:babyId - Get assessments by baby ID
-router.get('/assess/:babyId', assessmentController.getAssessmentByBabyId);
+// Baby
+router.get('/baby/:babyId/exists', babyController.checkBabyExists);
+router.get('/babies', babyController.getAllBabies);
+router.delete('/baby/:babyId', babyController.deleteBaby);
 
-// GET /api/assessments - Get all assessments
-router.get('/assessments', assessmentController.getAllAssessments);
 
-// GET /api/assessments/stats - Get statistics
-router.get('/assessments/stats', assessmentController.getStatistics);
+// Assessment
+router.post('/assess', assessmentController.createOrUpdateAssessment);
+router.get('/baby/:babyId/history', assessmentController.getBabyHistory);
+router.get('/assessment/:assessmentId', assessmentController.getAssessmentById);
 
-// DELETE /api/assess/:id - Delete assessment
-router.delete('/assess/:id', assessmentController.deleteAssessment);
+
+// Statistics
+router.get('/statistics', statisticsController.getStatistics);
 
 module.exports = router;
