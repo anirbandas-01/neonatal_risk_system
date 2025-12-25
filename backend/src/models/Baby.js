@@ -9,81 +9,142 @@ const assessmentSchema = new mongoose.Schema({
     },
 
     healthParameters: {
-        birthWeight: {
-            type: Number,
-            required: true,
-            min: 1.0,
-            max:6.0
-        },
-        birthLength: {
-            type: Number,
-            required: true,
-            min:35,
-            max:60
-        },
-        headCircumference: {
-            type: Number,
-            required: true,
-            min:25,
-            max:42
-        },
-        temperature: {
-            type: Number,
-            required: true,
-            min:35.0,
-            max:40.0
-        },
-        heartRate: {
-            type: Number,
-            required: true,
-            min:80,
-            max:200
-        },
-        respiratoryRate: {
-            type: Number,
-            required: true,
-            min: 20,
-            max: 80
-        },
-        jaundiceLevel: {
-            type: Number,
-            required: true,
-            min: 0,
-            max: 25
-        },
-        bloodGlucose: {
-            type: Number,
-            required: true,
-            min: 1.0,
-            max: 10.0
-        },
-        oxygenSaturation: {
-            type: Number,
-            required: true,
-            min: 70,
-            max: 100
-        },
-        apgarScore: {
-            type: Number,
-            required: true,
-            min: 0,
-            max: 10
-        },
-        birthDefects: {
-            type: String,
-            enum: ['No', 'Yes', 'Some distress'],
-            required: true
-        },
-        normalReflexes: {
-            type: String,
-            enum: ['Yes', 'No'],
-            required: true
-        },
-        immunizations: {
-            type: String,
-            enum: ['Yes', 'No'],
-            required: true
-        }
+         gestationalAgeWeeks: {
+        type: Number,
+        required: true,
+        min: 22,
+        max: 42
+    },
+
+    birthWeightKg: {
+        type: Number,
+        required: true,
+        min: 1.0,
+        max: 6.0
+    },
+
+    birthLengthCm: {
+        type: Number,
+        required: true,
+        min: 35,
+        max: 60
+    },
+
+    birthHeadCircumferenceCm: {
+        type: Number,
+        required: true,
+        min: 25,
+        max: 42
+    },
+
+    ageDays: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 60
+    },
+
+    weightKg: {
+        type: Number,
+        required: true,
+        min: 1.0,
+        max: 6.0
+    },
+
+    lengthCm: {
+        type: Number,
+        required: true,
+        min: 35,
+        max: 65
+    },
+
+    headCircumferenceCm: {
+        type: Number,
+        required: true,
+        min: 25,
+        max: 45
+    },
+
+    temperatureC: {
+        type: Number,
+        required: true,
+        min: 35.0,
+        max: 40.0
+    },
+
+    heartRateBpm: {
+        type: Number,
+        required: true,
+        min: 80,
+        max: 200
+    },
+
+    respiratoryRateBpm: {
+        type: Number,
+        required: true,
+        min: 20,
+        max: 80
+    },
+
+    oxygenSaturation: {
+        type: Number,
+        required: true,
+        min: 70,
+        max: 100
+    },
+
+    feedingType: {
+        type: String,
+        enum: ['Breast', 'Formula', 'Mixed'],
+        required: true
+    },
+
+    feedingFrequencyPerDay: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 20
+    },
+
+    urineOutputCount: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 20
+    },
+
+    stoolCount: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 20
+    },
+
+    jaundiceLevelMgDl: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 25
+    },
+
+    apgarScore: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 10
+    },
+
+    immunizationsDone: {
+        type: String,
+        enum: ['Yes', 'No'],
+        required: true
+    },
+
+    reflexesNormal: {
+        type: String,
+        enum: ['Yes', 'No'],
+        required: true
+    }
     },
 
     riskAssessment: {
@@ -201,7 +262,8 @@ babySchema.index({ currentRiskLevel: 1});
 babySchema.index({ lastVisitDate: -1});
 
 
-babySchema.pre('save', function(next){
+babySchema.pre('save', async function(){
+    console.log('🔥 pre-save hook running');
     if (this.assessments && this.assessments.length > 0) {
         this.totalVisits = this.assessments.length;
 
@@ -209,7 +271,7 @@ babySchema.pre('save', function(next){
         this.lastVisitDate = lastAssessment.assessmentDate;
         this.currentRiskLevel = lastAssessment.riskAssessment.finalRisk;
     }
-    next();
+    
 });
 
 const Baby = mongoose.model('Baby', babySchema);

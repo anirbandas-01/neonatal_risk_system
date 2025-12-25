@@ -29,7 +29,12 @@ exports.createOrUpdateAssessment = async (req, res) => {
     
     // Get ML model prediction
     console.log('Getting ML prediction...');
-    const mlPrediction = await mlService.predictRisk(healthParameters);
+    //const mlPrediction = await mlService.predictRisk(healthParameters);
+    const mlPrediction = await mlService.predictRisk(
+    isNewBaby ? babyInfo : baby.babyInfo,
+    healthParameters
+);
+
     console.log('ML Prediction:', mlPrediction);
     
     // Generate recommendations

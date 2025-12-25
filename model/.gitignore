@@ -1,0 +1,19 @@
+# Python virtual environment
+tf_env/
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# ML artifacts
+*.h5
+*.pkl
+*.pt
+.cache/
+.tensorflow/
+
+# Env variables
+.env

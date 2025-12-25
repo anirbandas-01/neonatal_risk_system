@@ -1,16 +1,15 @@
 const axios = require('axios');
+require('dotenv').config();
 
 const ML_MODEL_URL = process.env.ML_MODEL_URL || 'http://localhost:5000';
-
+const buildMLPayload = require('../Utils/mlPayloadBuilder');
 class MLServices {
-    async predictRisk(healthParameters){
+    /* async predictRisk(healthParameters){
         try {
             console.log('Calling ML Model API..');
             console.log('URL:',  `${ML_MODEL_URL}/predict`);
 
-            const response = await axios.post(`${ML_MODEL_URL}/predict`, {
-                data: healthParameters
-            },{
+            const response = await axios.post(`${ML_MODEL_URL}/predict`, healthParameters,{
                 timeout: 10000,
                 headers: {
                     'Content-Type': 'application/json'
@@ -30,9 +29,37 @@ class MLServices {
 
             throw new Error('Failed to get prediction from ML Model');
         }
-    }
+    } */
 
-    fallbackPrediction(params) {
+     
+
+async predictRisk(babyInfo, healthParameters) {
+    try {
+        const mlPayload = buildMLPayload(babyInfo, healthParameters);
+
+        console.log('Calling ML Model API..');
+        console.log('Payload:', mlPayload);
+
+        const response = await axios.post(
+            `${ML_MODEL_URL}/predict`,
+            mlPayload,
+            {
+                timeout: 10000,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.log('ML Model API Error:', error.message);
+        throw error;
+    }
+}
+
+
+
+
+    /* fallbackPrediction(params) {
         console.log('Using fallback prediction logic....');
 
         let score = 0;
@@ -95,7 +122,7 @@ class MLServices {
             lstmScore: score * 0.95,
             ensembleScore: score * 0.92
         };
-    }
+    } */
 
     generateRecommendations(riskLevel, parameters){
         const recommendations = {
@@ -131,7 +158,7 @@ class MLServices {
 
     async checkHealth(){
         try{
-            const response = await axios.get(`${ML_MODEL_URL}/health`, {
+            const response = await axios.get(`${ML_MODEL_URL}/`, {
                 timeout: 5000
             });
             return {
