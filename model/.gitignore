@@ -9,7 +9,7 @@ __pycache__/
 *.pyc
 
 # ML artifacts
-*.h5
+
 *.pkl
 *.pt
 .cache/
