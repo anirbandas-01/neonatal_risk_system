@@ -1,0 +1,23 @@
+{
+    "gender": "male",
+    "gestational_age_weeks": 38,
+    "birth_weight_kg": 3.2,
+    "birth_length_cm": 50,
+    "birth_head_circumference_cm": 34,
+    "age_days": 5,
+    "weight_kg": 3.1,
+    "length_cm": 50.5,
+    "head_circumference_cm": 34.2,
+    "temperature_c": 36.8,
+    "heart_rate_bpm": 140,
+    "respiratory_rate_bpm": 40,
+    "oxygen_saturation": 98,
+    "feeding_type": "breast",
+    "feeding_frequency_per_day": 8,
+    "urine_output_count": 6,
+    "stool_count": 4,
+    "jaundice_level_mg_dl": 8.5,
+    "apgar_score": 9,
+    "immunizations_done": "yes",
+    "reflexes_normal": "yes"
+}
