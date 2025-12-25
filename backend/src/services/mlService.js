@@ -1,119 +1,151 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const ML_MODEL_URL = process.env.ML_MODEL_URL || 'http://localhost:5000';
+const ML_MODEL_URL = process.env.ML_MODEL_URL || 'http://localhost:9000';
 const buildMLPayload = require('../Utils/mlPayloadBuilder');
+
 class MLServices {
-    /* async predictRisk(healthParameters){
+    async predictRisk(babyInfo, healthParameters) {
         try {
-            console.log('Calling ML Model API..');
-            console.log('URL:',  `${ML_MODEL_URL}/predict`);
+            const mlPayload = buildMLPayload(babyInfo, healthParameters);
 
-            const response = await axios.post(`${ML_MODEL_URL}/predict`, healthParameters,{
-                timeout: 10000,
-                headers: {
-                    'Content-Type': 'application/json'
+            console.log('Calling ML Model API...');
+            console.log('URL:', `${ML_MODEL_URL}/predict`);
+            console.log('Payload:', JSON.stringify(mlPayload, null, 2));
+
+            const response = await axios.post(
+                `${ML_MODEL_URL}/predict`,
+                mlPayload,
+                {
+                    timeout: 10000,
+                    headers: { 'Content-Type': 'application/json' }
                 }
-            });
+            );
 
-            console.log('ML Model API Response:',  response.data);
-            return response.data;
-
-        } catch (error) {
-            console.log('ML Model API Error:', error.message);
-
-            if(error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT'){
-                console.log('ML Model not available. Using  fallback Prediction...');
+            console.log('ML Model Response:', response.data);
+            
+            // Transform ML model response to expected format
+            const mlResponse = response.data;
+            
+            // Check if response has the expected format
+            if (mlResponse.finalRisk) {
+                // Already in correct format
+                return mlResponse;
+            } else if (mlResponse.risk_level) {
+                // Transform from ML model format
+                console.log('Transforming ML response format...');
+                
+                // Map risk_level to finalRisk
+                let finalRisk;
+                const riskLevel = mlResponse.risk_level.toLowerCase();
+                
+                if (riskLevel === 'low' || riskLevel === 'safe') {
+                    finalRisk = 'Low Risk';
+                } else if (riskLevel === 'medium' || riskLevel === 'at risk') {
+                    finalRisk = 'Medium Risk';
+                } else if (riskLevel === 'high' || riskLevel === 'critical') {
+                    finalRisk = 'High Risk';
+                } else {
+                    finalRisk = 'Medium Risk'; // Default
+                }
+                
+                return {
+                    finalRisk: finalRisk,
+                    confidence: mlResponse.confidence || 0.5,
+                    mlScore: mlResponse.ml_score || 50,
+                    lstmScore: mlResponse.lstm_score || 50,
+                    ensembleScore: mlResponse.ensemble_score || 50
+                };
+            } else {
+                console.error('Invalid ML response format:', mlResponse);
                 return this.fallbackPrediction(healthParameters);
             }
 
-            throw new Error('Failed to get prediction from ML Model');
-        }
-    } */
-
-     
-
-async predictRisk(babyInfo, healthParameters) {
-    try {
-        const mlPayload = buildMLPayload(babyInfo, healthParameters);
-
-        console.log('Calling ML Model API..');
-        console.log('Payload:', mlPayload);
-
-        const response = await axios.post(
-            `${ML_MODEL_URL}/predict`,
-            mlPayload,
-            {
-                timeout: 10000,
-                headers: { 'Content-Type': 'application/json' }
+            return response.data;
+            
+        } catch (error) {
+            console.error('ML Model API Error:', error.message);
+            
+            if (error.code === 'ECONNREFUSED') {
+                console.error('ML Model server not reachable at:', ML_MODEL_URL);
+            } else if (error.code === 'ETIMEDOUT') {
+                console.error('ML Model request timed out');
+            } else if (error.response) {
+                console.error('ML Model error response:', error.response.data);
             }
-        );
-
-        return response.data;
-    } catch (error) {
-        console.log('ML Model API Error:', error.message);
-        throw error;
+            
+            console.log('Using fallback prediction...');
+            return this.fallbackPrediction(healthParameters);
+        }
     }
-}
 
-
-
-
-    /* fallbackPrediction(params) {
-        console.log('Using fallback prediction logic....');
+    fallbackPrediction(params) {
+        console.log('Calculating fallback risk assessment...');
 
         let score = 0;
 
-        if(params.birthWeight < 2.5){
+        // Birth weight assessment
+        if (params.birthWeightKg < 2.5) {
             score += 30;
-        }else if(params.birthWeight < 3.0){
+        } else if (params.birthWeightKg < 3.0) {
             score += 15;
         }
 
-        if(params.temperature < 36.5 || params.temperature > 37.5){
+        // Temperature assessment
+        if (params.temperatureC < 36.5 || params.temperatureC > 37.5) {
             score += 20;
         }
 
-        if(params.oxygenSaturation < 95 ){
+        // Oxygen saturation assessment
+        if (params.oxygenSaturation < 95) {
             score += 25;
         }
 
-        if(params.apgarScore < 7){
+        // APGAR score assessment
+        if (params.apgarScore < 7) {
             score += 30;
         }
 
-        if(params.heartRate < 120 || params.heartRate > 160){
+        // Heart rate assessment
+        if (params.heartRateBpm < 120 || params.heartRateBpm > 160) {
             score += 15;
         }
 
-        if(params.bloodGlucose < 2.6 ){
+        // Jaundice level assessment
+        if (params.jaundiceLevelMgDl > 10) {
             score += 20;
         }
 
-        if(params.jaundiceLevel > 10){
-            score += 20;
-        }
-
-        if(params.birthDefects === 'Yes'){
+        // Gestational age assessment
+        if (params.gestationalAgeWeeks < 37) {
             score += 25;
-        }else if(params.birthDefects === 'Some distress'){
-            score += 15;
         }
 
+        // Reflexes assessment
+        if (params.reflexesNormal === 'No') {
+            score += 20;
+        }
+
+        // Respiratory rate assessment
+        if (params.respiratoryRateBpm > 60 || params.respiratoryRateBpm < 30) {
+            score += 15;
+        }
 
         let finalRisk;
         let confidence;
 
-        if(score >= 60){
+        if (score >= 60) {
             finalRisk = 'High Risk';
-            confidence = 0.85 + (Math.random()* 0.10);
-        }else if(score >= 30){
+            confidence = 0.85 + (Math.random() * 0.10);
+        } else if (score >= 30) {
             finalRisk = 'Medium Risk';
-            confidence = 0.70 + (Math.random()*0.15);
-        }else{
+            confidence = 0.70 + (Math.random() * 0.15);
+        } else {
             finalRisk = 'Low Risk';
-            confidence = 0.85 + (Math.random()*0.15);
+            confidence = 0.85 + (Math.random() * 0.15);
         }
+
+        console.log(`Fallback prediction: ${finalRisk} (Score: ${score})`);
 
         return {
             finalRisk,
@@ -122,24 +154,24 @@ async predictRisk(babyInfo, healthParameters) {
             lstmScore: score * 0.95,
             ensembleScore: score * 0.92
         };
-    } */
+    }
 
-    generateRecommendations(riskLevel, parameters){
+    generateRecommendations(riskLevel, parameters) {
         const recommendations = {
             'Low Risk': [
-                'Continue routine monitoring and care.',
+                'Continue routine monitoring and care',
                 'Maintain regular feeding schedule',
                 'Monitor weight gain progress',
                 'Schedule next check-up as per guidelines',
                 'Ensure proper sleep and rest'
             ],
             'Medium Risk': [
-                 'Increase monitoring frequency to every 4-6 hours',
-                 'Close observation of vital signs',
-                 'Consider additional diagnostic tests',
-                 'Ensure proper nutrition and hydration',
-                 'Schedule follow-up within 24-48 hours',
-                 'Keep detailed records of all parameters'
+                'Increase monitoring frequency to every 4-6 hours',
+                'Close observation of vital signs',
+                'Consider additional diagnostic tests',
+                'Ensure proper nutrition and hydration',
+                'Schedule follow-up within 24-48 hours',
+                'Keep detailed records of all parameters'
             ],
             'High Risk': [
                 'IMMEDIATE medical attention required',
@@ -153,22 +185,24 @@ async predictRisk(babyInfo, healthParameters) {
         };
 
         return recommendations[riskLevel] || recommendations['Medium Risk'];
-
     }
 
-    async checkHealth(){
-        try{
+    async checkHealth() {
+        try {
             const response = await axios.get(`${ML_MODEL_URL}/`, {
                 timeout: 5000
             });
             return {
                 available: true,
-                message: 'Ml model is running'
+                message: 'ML model is running',
+                url: ML_MODEL_URL
             };
-        }catch(error){
+        } catch (error) {
             return {
                 available: false,
-                message: 'Ml model Api is not  available. Using fallback predictions.'
+                message: 'ML model API is not available. Using fallback predictions.',
+                url: ML_MODEL_URL,
+                error: error.message
             };
         }
     }

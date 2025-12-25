@@ -9,7 +9,7 @@ const assessmentSchema = new mongoose.Schema({
     },
 
     healthParameters: {
-         gestationalAgeWeeks: {
+    gestationalAgeWeeks: {
         type: Number,
         required: true,
         min: 22,
