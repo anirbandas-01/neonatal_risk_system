@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Share2, Home } from 'lucide-react';
+import { ArrowLeft, Download, Share2, Home, History } from 'lucide-react';
 import RiskAssessmentResult from '../components/RiskAssessmentResult';
 import { formatDate } from '../utils/helpers';
 
@@ -7,7 +7,7 @@ function ResultsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Get assessment data passed from form
+  // Get assessment data passed from form or history
   const assessmentData = location.state?.assessmentData;
 
   // If no data, redirect to home
@@ -38,6 +38,10 @@ function ResultsPage() {
     // TODO: Implement share functionality
   };
 
+  const handleViewHistory = () => {
+    navigate(`/baby/${assessmentData.babyId}/history`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -53,21 +57,33 @@ function ResultsPage() {
           </button>
           
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">
                   Risk Assessment Results
                 </h1>
-                <p className="text-gray-600 mt-2">
-                  Baby ID: <span className="font-mono font-semibold">{assessmentData.babyId}</span>
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Assessment Date: {formatDate(assessmentData.assessmentDate || new Date())}
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-gray-600">
+                    <strong>Baby:</strong> {assessmentData.babyInfo?.name || 'N/A'}
+                  </p>
+                  <p className="text-gray-600">
+                    <strong>Baby ID:</strong> <span className="font-mono font-semibold">{assessmentData.babyId}</span>
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    <strong>Assessment Date:</strong> {formatDate(assessmentData.assessmentDate || new Date())}
+                  </p>
+                </div>
               </div>
               
               {/* Action Buttons */}
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={handleViewHistory}
+                  className="flex items-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                >
+                  <History className="w-5 h-5 mr-2" />
+                  View History
+                </button>
                 <button
                   onClick={handleDownloadPDF}
                   className="flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
@@ -91,12 +107,12 @@ function ResultsPage() {
         <RiskAssessmentResult assessmentData={assessmentData} />
 
         {/* Additional Actions */}
-        <div className="mt-8 flex justify-center space-x-4">
+        <div className="mt-8 flex justify-center flex-wrap gap-4">
           <button
-            onClick={() => navigate('/assessment')}
+            onClick={() => navigate('/assessment', { state: { baby: { babyId: assessmentData.babyId, babyInfo: assessmentData.babyInfo } } })}
             className="flex items-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
           >
-            New Assessment
+            Add Another Assessment
           </button>
           <button
             onClick={() => navigate('/dashboard')}

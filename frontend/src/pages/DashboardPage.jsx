@@ -1,83 +1,76 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, RefreshCw, AlertCircle, Plus } from 'lucide-react';
-import AssessmentCard from '../components/AssessmentCard';
-import { assessmentAPI } from '../services/api';
+import { ArrowLeft, Search, Filter, RefreshCw, AlertCircle, Plus, User, Calendar, TrendingUp, Eye } from 'lucide-react';
+import { babyAPI, assessmentAPI } from '../services/api';
+import { getRiskColor, formatDate } from '../utils/helpers';
 
 function DashboardPage() {
   const navigate = useNavigate();
 
-  // State
-  const [assessments, setAssessments] = useState([]);
-  const [filteredAssessments, setFilteredAssessments] = useState([]);
+  const [babies, setBabies] = useState([]);
+  const [filteredBabies, setFilteredBabies] = useState([]);
+  const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('All');
 
-  // Fetch assessments on component mount
   useEffect(() => {
-    fetchAssessments();
+    fetchData();
   }, []);
 
-  // Filter assessments when search or filter changes
   useEffect(() => {
-    filterAssessments();
-  }, [searchTerm, riskFilter, assessments]);
+    filterBabies();
+  }, [searchTerm, riskFilter, babies]);
 
-  const fetchAssessments = async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await assessmentAPI.getAllAssessments();
-      setAssessments(response.data || []);
-    } catch (err) {
-      console.error('Error fetching assessments:', err);
-      setError('Failed to load assessments. Using mock data for demo.');
+      const [babiesResponse, statsResponse] = await Promise.all([
+        babyAPI.getAllBabies(),
+        assessmentAPI.getStatistics()
+      ]);
       
-      // Use mock data for testing (since backend not ready)
-      setAssessments(getMockAssessments());
+      setBabies(babiesResponse.data || []);
+      setStatistics(statsResponse.data || null);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const filterAssessments = () => {
-    let filtered = [...assessments];
+  const filterBabies = () => {
+    let filtered = [...babies];
 
-    // Search filter (by baby ID)
     if (searchTerm) {
-      filtered = filtered.filter(assessment =>
-        assessment.babyId.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(baby =>
+        baby.babyId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        baby.babyInfo.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Risk level filter
     if (riskFilter !== 'All') {
-      filtered = filtered.filter(
-        assessment => assessment.riskAssessment.finalRisk === riskFilter
-      );
+      filtered = filtered.filter(baby => baby.currentRiskLevel === riskFilter);
     }
 
-    setFilteredAssessments(filtered);
+    setFilteredBabies(filtered);
   };
 
   const handleRefresh = () => {
-    fetchAssessments();
+    fetchData();
   };
 
-  // Get statistics
-  const getStats = () => {
-    const total = assessments.length;
-    const lowRisk = assessments.filter(a => a.riskAssessment.finalRisk === 'Low Risk').length;
-    const mediumRisk = assessments.filter(a => a.riskAssessment.finalRisk === 'Medium Risk').length;
-    const highRisk = assessments.filter(a => a.riskAssessment.finalRisk === 'High Risk').length;
-
-    return { total, lowRisk, mediumRisk, highRisk };
+  const handleViewHistory = (baby) => {
+    navigate(`/baby/${baby.babyId}/history`);
   };
 
-  const stats = getStats();
+  const handleAddAssessment = (baby) => {
+    navigate('/assessment', { state: { baby } });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
@@ -97,10 +90,10 @@ function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">
-                  Assessment Dashboard
+                  Dashboard
                 </h1>
                 <p className="text-gray-600 mt-2">
-                  View and manage all health assessments
+                  View and manage all baby records
                 </p>
               </div>
               
@@ -116,45 +109,50 @@ function DashboardPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-            <p className="text-sm text-gray-600 mb-2">Total Assessments</p>
-            <p className="text-3xl font-bold text-gray-800">{stats.total}</p>
-          </div>
+        {statistics && (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+              <p className="text-sm text-gray-600 mb-2">Total Babies</p>
+              <p className="text-3xl font-bold text-gray-800">{statistics.totalBabies}</p>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-            <p className="text-sm text-gray-600 mb-2">Low Risk</p>
-            <p className="text-3xl font-bold text-green-600">{stats.lowRisk}</p>
-          </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+              <p className="text-sm text-gray-600 mb-2">Total Assessments</p>
+              <p className="text-3xl font-bold text-gray-800">{statistics.totalAssessments}</p>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
-            <p className="text-sm text-gray-600 mb-2">Medium Risk</p>
-            <p className="text-3xl font-bold text-yellow-600">{stats.mediumRisk}</p>
-          </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+              <p className="text-sm text-gray-600 mb-2">Low Risk</p>
+              <p className="text-3xl font-bold text-green-600">{statistics.lowRisk}</p>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
-            <p className="text-sm text-gray-600 mb-2">High Risk</p>
-            <p className="text-3xl font-bold text-red-600">{stats.highRisk}</p>
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+              <p className="text-sm text-gray-600 mb-2">Medium Risk</p>
+              <p className="text-3xl font-bold text-yellow-600">{statistics.mediumRisk}</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+              <p className="text-sm text-gray-600 mb-2">High Risk</p>
+              <p className="text-3xl font-bold text-red-600">{statistics.highRisk}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Search and Filter Bar */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             
-            {/* Search */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by Baby ID..."
+                placeholder="Search by Baby ID or Name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Filter by Risk Level */}
             <div className="flex items-center space-x-2">
               <Filter className="text-gray-500 w-5 h-5" />
               <select
@@ -169,7 +167,6 @@ function DashboardPage() {
               </select>
             </div>
 
-            {/* Refresh Button */}
             <button
               onClick={handleRefresh}
               className="flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition-colors"
@@ -179,7 +176,6 @@ function DashboardPage() {
             </button>
           </div>
 
-          {/* Active Filters Display */}
           {(searchTerm || riskFilter !== 'All') && (
             <div className="mt-4 flex items-center space-x-2">
               <span className="text-sm text-gray-600">Active filters:</span>
@@ -210,10 +206,7 @@ function DashboardPage() {
         {error && (
           <div className="mb-6 bg-yellow-100 border-2 border-yellow-500 rounded-lg p-4 flex items-center">
             <AlertCircle className="w-6 h-6 text-yellow-600 mr-3" />
-            <div>
-              <p className="font-semibold text-yellow-800">Notice</p>
-              <p className="text-sm text-yellow-700">{error}</p>
-            </div>
+            <p className="text-yellow-800">{error}</p>
           </div>
         )}
 
@@ -221,32 +214,123 @@ function DashboardPage() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
-            <p className="ml-4 text-gray-600 text-lg">Loading assessments...</p>
+            <p className="ml-4 text-gray-600 text-lg">Loading babies...</p>
           </div>
         ) : (
           <>
             {/* Results Count */}
             <div className="mb-4">
               <p className="text-gray-600">
-                Showing <span className="font-semibold">{filteredAssessments.length}</span> of <span className="font-semibold">{assessments.length}</span> assessments
+                Showing <span className="font-semibold">{filteredBabies.length}</span> of <span className="font-semibold">{babies.length}</span> babies
               </p>
             </div>
 
-            {/* Assessments Grid */}
-            {filteredAssessments.length === 0 ? (
+            {/* Babies List */}
+            {filteredBabies.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                <p className="text-gray-500 text-lg mb-4">No assessments found</p>
+                <p className="text-gray-500 text-lg mb-4">
+                  {searchTerm || riskFilter !== 'All' 
+                    ? 'No babies match your filters' 
+                    : 'No baby records found'}
+                </p>
                 <button
                   onClick={() => navigate('/assessment')}
                   className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
                 >
-                  Create First Assessment
+                  Create First Baby Record
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAssessments.map((assessment, index) => (
-                  <AssessmentCard key={index} assessment={assessment} />
+                {filteredBabies.map((baby) => (
+                  <div
+                    key={baby._id}
+                    className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                  >
+                    {/* Risk Status Bar */}
+                    <div className={`h-2 ${
+                      baby.currentRiskLevel === 'Low Risk' ? 'bg-green-500' :
+                      baby.currentRiskLevel === 'Medium Risk' ? 'bg-yellow-500' :
+                      'bg-red-500'
+                    }`}></div>
+
+                    <div className="p-6">
+                      {/* Baby Info */}
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                          {baby.babyInfo.name}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-600 mb-1">
+                          <User className="w-4 h-4 mr-2" />
+                          <span className="font-mono">{baby.babyId}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>DOB: {new Date(baby.babyInfo.dateOfBirth).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      {/* Risk Status */}
+                      <div className={`mb-4 px-4 py-2 rounded-lg ${getRiskColor(baby.currentRiskLevel)}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">{baby.currentRiskLevel}</span>
+                          <span className="text-sm">Latest Status</span>
+                        </div>
+                      </div>
+
+                      {/* Statistics */}
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Total Visits</p>
+                          <p className="text-lg font-bold text-gray-800">{baby.totalVisits}</p>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-xs text-gray-500">Last Visit</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {new Date(baby.lastVisitDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Latest Assessment Info */}
+                      {baby.assessments && baby.assessments.length > 0 && (
+                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-2">Latest Assessment</p>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-gray-500">Weight:</span>{' '}
+                              <span className="font-semibold">
+                                {baby.assessments[0].healthParameters.birthWeight} kg
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">O₂:</span>{' '}
+                              <span className="font-semibold">
+                                {baby.assessments[0].healthParameters.oxygenSaturation}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleViewHistory(baby)}
+                          className="flex-1 flex items-center justify-center py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View History
+                        </button>
+                        <button
+                          onClick={() => handleAddAssessment(baby)}
+                          className="flex items-center justify-center py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -256,140 +340,6 @@ function DashboardPage() {
       </div>
     </div>
   );
-}
-
-// Mock data for testing (until backend is ready)
-function getMockAssessments() {
-  return [
-    {
-      babyId: 'BABY-1734567890-123',
-      assessmentDate: new Date('2024-12-18'),
-      createdAt: new Date('2024-12-18'),
-      healthParameters: {
-        birthWeight: 3.2,
-        birthLength: 50,
-        headCircumference: 34,
-        temperature: 36.8,
-        heartRate: 140,
-        respiratoryRate: 45,
-        jaundiceLevel: 5.0,
-        bloodGlucose: 4.5,
-        oxygenSaturation: 98,
-        apgarScore: 9,
-        birthDefects: 'No',
-        normalReflexes: 'Yes',
-        immunizations: 'Yes'
-      },
-      riskAssessment: {
-        finalRisk: 'Low Risk',
-        confidence: 0.93,
-        recommendations: [
-          'Continue routine monitoring and care',
-          'Maintain regular feeding schedule',
-          'Monitor weight gain progress'
-        ],
-        mlModelScore: 25.5,
-        lstmModelScore: 24.2,
-        ensembleScore: 23.8
-      }
-    },
-    {
-      babyId: 'BABY-1734567890-456',
-      assessmentDate: new Date('2024-12-18'),
-      createdAt: new Date('2024-12-18'),
-      healthParameters: {
-        birthWeight: 2.8,
-        birthLength: 48,
-        headCircumference: 33,
-        temperature: 37.2,
-        heartRate: 155,
-        respiratoryRate: 52,
-        jaundiceLevel: 8.5,
-        bloodGlucose: 3.8,
-        oxygenSaturation: 94,
-        apgarScore: 7,
-        birthDefects: 'Some distress',
-        normalReflexes: 'Yes',
-        immunizations: 'No'
-      },
-      riskAssessment: {
-        finalRisk: 'Medium Risk',
-        confidence: 0.76,
-        recommendations: [
-          'Increase monitoring frequency',
-          'Close observation of vital signs',
-          'Consider additional diagnostic tests'
-        ],
-        mlModelScore: 45.8,
-        lstmModelScore: 43.5,
-        ensembleScore: 44.2
-      }
-    },
-    {
-      babyId: 'BABY-1734567890-789',
-      assessmentDate: new Date('2024-12-17'),
-      createdAt: new Date('2024-12-17'),
-      healthParameters: {
-        birthWeight: 2.2,
-        birthLength: 44,
-        headCircumference: 31,
-        temperature: 38.1,
-        heartRate: 175,
-        respiratoryRate: 68,
-        jaundiceLevel: 15.0,
-        bloodGlucose: 2.2,
-        oxygenSaturation: 89,
-        apgarScore: 5,
-        birthDefects: 'Yes',
-        normalReflexes: 'No',
-        immunizations: 'No'
-      },
-      riskAssessment: {
-        finalRisk: 'High Risk',
-        confidence: 0.88,
-        recommendations: [
-          'Immediate medical attention required',
-          'Continuous monitoring of vital signs',
-          'Prepare for possible intervention'
-        ],
-        mlModelScore: 78.3,
-        lstmModelScore: 75.9,
-        ensembleScore: 76.8
-      }
-    },
-    {
-      babyId: 'BABY-1734567890-012',
-      assessmentDate: new Date('2024-12-17'),
-      createdAt: new Date('2024-12-17'),
-      healthParameters: {
-        birthWeight: 3.5,
-        birthLength: 52,
-        headCircumference: 35,
-        temperature: 36.7,
-        heartRate: 135,
-        respiratoryRate: 42,
-        jaundiceLevel: 4.2,
-        bloodGlucose: 5.1,
-        oxygenSaturation: 99,
-        apgarScore: 10,
-        birthDefects: 'No',
-        normalReflexes: 'Yes',
-        immunizations: 'Yes'
-      },
-      riskAssessment: {
-        finalRisk: 'Low Risk',
-        confidence: 0.96,
-        recommendations: [
-          'Continue routine monitoring and care',
-          'Maintain regular feeding schedule',
-          'Monitor weight gain progress'
-        ],
-        mlModelScore: 18.5,
-        lstmModelScore: 17.2,
-        ensembleScore: 16.8
-      }
-    }
-  ];
 }
 
 export default DashboardPage;

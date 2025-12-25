@@ -4,6 +4,8 @@ import AssessmentFormPage from './pages/AssessmentFormPage';
 import DashboardPage from './pages/DashboardPage';
 import TestPage from './pages/TestPage';
 import ResultsPage from './pages/ResultsPage';
+import BabyHistoryPage from './pages/BabyHistoryPage';
+
 
 
 function App() {
@@ -15,9 +17,10 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path='/results' element={<ResultsPage  />}/>
+        <Route path="/baby/:babyId/history" element={<BabyHistoryPage />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;

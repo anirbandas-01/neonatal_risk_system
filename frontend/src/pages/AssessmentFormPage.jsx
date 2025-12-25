@@ -107,7 +107,7 @@ function AssessmentFormPage() {
       };
       
       // Call API
-        const response = await assessmentAPI.createAssessment(assessmentData);
+        const response = await assessmentAPI.createOrUpdate(assessmentData);
 
         console.log('Assessment created:', response);
         setSubmitSuccess(true);
