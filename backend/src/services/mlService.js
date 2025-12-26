@@ -57,8 +57,8 @@ class MLServices {
                     ensembleScore: mlResponse.ensemble_score || 50
                 };
             } else {
-                console.error('Invalid ML response format:', mlResponse);
-                return this.fallbackPrediction(healthParameters);
+                 console.error('Invalid ML response format:', mlResponse);
+                 throw new Error('Invalid ML response format');
             }
 
             return response.data;
@@ -74,87 +74,11 @@ class MLServices {
                 console.error('ML Model error response:', error.response.data);
             }
             
-            console.log('Using fallback prediction...');
-            return this.fallbackPrediction(healthParameters);
+            throw new Error('ML model service failed');
+
         }
     }
 
-    fallbackPrediction(params) {
-        console.log('Calculating fallback risk assessment...');
-
-        let score = 0;
-
-        // Birth weight assessment
-        if (params.birthWeightKg < 2.5) {
-            score += 30;
-        } else if (params.birthWeightKg < 3.0) {
-            score += 15;
-        }
-
-        // Temperature assessment
-        if (params.temperatureC < 36.5 || params.temperatureC > 37.5) {
-            score += 20;
-        }
-
-        // Oxygen saturation assessment
-        if (params.oxygenSaturation < 95) {
-            score += 25;
-        }
-
-        // APGAR score assessment
-        if (params.apgarScore < 7) {
-            score += 30;
-        }
-
-        // Heart rate assessment
-        if (params.heartRateBpm < 120 || params.heartRateBpm > 160) {
-            score += 15;
-        }
-
-        // Jaundice level assessment
-        if (params.jaundiceLevelMgDl > 10) {
-            score += 20;
-        }
-
-        // Gestational age assessment
-        if (params.gestationalAgeWeeks < 37) {
-            score += 25;
-        }
-
-        // Reflexes assessment
-        if (params.reflexesNormal === 'No') {
-            score += 20;
-        }
-
-        // Respiratory rate assessment
-        if (params.respiratoryRateBpm > 60 || params.respiratoryRateBpm < 30) {
-            score += 15;
-        }
-
-        let finalRisk;
-        let confidence;
-
-        if (score >= 60) {
-            finalRisk = 'High Risk';
-            confidence = 0.85 + (Math.random() * 0.10);
-        } else if (score >= 30) {
-            finalRisk = 'Medium Risk';
-            confidence = 0.70 + (Math.random() * 0.15);
-        } else {
-            finalRisk = 'Low Risk';
-            confidence = 0.85 + (Math.random() * 0.15);
-        }
-
-        console.log(`Fallback prediction: ${finalRisk} (Score: ${score})`);
-
-        return {
-            finalRisk,
-            confidence: Math.min(confidence, 1.0),
-            mlScore: score,
-            lstmScore: score * 0.95,
-            ensembleScore: score * 0.92
-        };
-    }
 
     generateRecommendations(riskLevel, parameters) {
         const recommendations = {
