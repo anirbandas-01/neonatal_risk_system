@@ -255,7 +255,7 @@ const babySchema = new mongoose.Schema({
 
 
 
-babySchema.index({ babyId: 1});
+//babySchema.index({ babyId: 1});
 babySchema.index({ 'babyInfo.name': 1});
 babySchema.index({ 'parentInfo.contactNumber': 1});
 babySchema.index({ currentRiskLevel: 1});
