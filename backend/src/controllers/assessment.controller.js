@@ -1,6 +1,9 @@
 const Baby = require('../models/Baby');
 const mlService = require('../services/mlService');
 
+const normalize = (value) =>
+  typeof value === 'string' ? value.toLowerCase() : value;
+
 /**
  * Create or update assessment
  */
@@ -94,6 +97,17 @@ exports.createOrUpdateAssessment = async (req, res) => {
                 message: 'ML model returned invalid response'
             });
         }
+        // ✅ Normalize enum-based health parameters BEFORE saving
+        if (healthParameters) {
+               healthParameters.feedingType =
+                 normalize(healthParameters.feedingType);
+
+               healthParameters.immunizationsDone =
+                 normalize(healthParameters.immunizationsDone);
+
+               healthParameters.reflexesNormal =
+                  normalize(healthParameters.reflexesNormal);
+           }
         
         // Generate recommendations
         const recommendations = mlService.generateRecommendations(

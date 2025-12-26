@@ -95,7 +95,7 @@ const assessmentSchema = new mongoose.Schema({
 
     feedingType: {
         type: String,
-        enum: ['Breast', 'Formula', 'Mixed'],
+        enum: ['breast', 'formula', 'mixed'],
         required: true
     },
 
@@ -136,13 +136,13 @@ const assessmentSchema = new mongoose.Schema({
 
     immunizationsDone: {
         type: String,
-        enum: ['Yes', 'No'],
+        enum: ['yes', 'no'],
         required: true
     },
 
     reflexesNormal: {
         type: String,
-        enum: ['Yes', 'No'],
+        enum: ['yes', 'no'],
         required: true
     }
     },
