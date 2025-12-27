@@ -42,18 +42,22 @@ function HomePage() {
               Access comprehensive neonatal risk assessment tools powered by advanced AI technology. 
               Monitor, assess, and provide the best care for newborns with data-driven insights.
             </p>
+
             <div className="flex flex-wrap gap-4 mt-6">
-              <div className="flex items-center space-x-2 bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                <Shield className="w-5 h-5 text-white" />
-                <span className="text-white font-semibold">HIPAA Compliant</span>
+              
+              <div className="flex items-center  space-x-2 bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
+                 <Shield className="w-5 h-5 text-white" />
+                 <span className="text-blue-600 font-semibold ">HIPAA Compliant</span>
               </div>
+            
               <div className="flex items-center space-x-2 bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
                 <Award className="w-5 h-5 text-white" />
-                <span className="text-white font-semibold">Medical Grade AI</span>
+                <span className="font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Medical Grade AI</span>
               </div>
+            
               <div className="flex items-center space-x-2 bg-white bg-opacity-20 px-4 py-2 rounded-lg backdrop-blur-sm">
                 <Clock className="w-5 h-5 text-white" />
-                <span className="text-white font-semibold">24/7 Available</span>
+                <span className="font-semibold bg-gradient-to-r  from-purple-700 via-blue-600 to-pink-600 bg-clip-text text-transparent">24/7 Available</span>
               </div>
             </div>
           </div>

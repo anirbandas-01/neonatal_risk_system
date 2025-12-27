@@ -5,7 +5,7 @@ import DashboardPage from './pages/DashboardPage';
 import TestPage from './pages/TestPage';
 import ResultsPage from './pages/ResultsPage';
 import BabyHistoryPage from './pages/BabyHistoryPage';
-
+import ClinicalLandingPage from './pages/ClinicalLandingPage';
 
 
 function App() {
@@ -13,6 +13,7 @@ function App() {
 <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/ClinicalLandingPage" element={<ClinicalLandingPage />} />
         <Route path="/assessment" element={<AssessmentFormPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/test" element={<TestPage />} />
