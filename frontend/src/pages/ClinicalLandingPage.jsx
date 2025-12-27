@@ -89,13 +89,16 @@ export default function ClinicalLandingPage() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
-                  className="flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-md font-semibold"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Doctor Login
-                </button>
+                <div className="text-right">
+                  <p className="text-xs text-gray-600 font-semibold mb-1">Authorized Clinical Use</p>
+                  <button
+                    onClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
+                    className="flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-md font-semibold"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Doctor Login
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -111,9 +114,9 @@ export default function ClinicalLandingPage() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full mb-6">
-              <Shield className="w-4 h-4 text-white mr-2" />
-              <span className="text-white text-sm font-semibold">Clinical-Grade AI • HIPAA Compliant</span>
+            <div className="inline-flex items-center px-6 py-3 bg-blue-800 bg-opacity-40 rounded-full mb-6 border-2 border-blue-300 shadow-lg">
+              <Shield className="w-5 h-5 text-blue-100 mr-2" />
+              <span className="text-white text-sm font-semibold tracking-wide">Clinical-Grade AI • HIPAA Compliant</span>
             </div>
             
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
@@ -235,6 +238,12 @@ export default function ClinicalLandingPage() {
               </div>
             ))}
           </div>
+          
+          <div className="mt-12 max-w-4xl mx-auto bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6 shadow-md">
+            <p className="text-gray-800 font-semibold text-lg leading-relaxed">
+              ℹ️ The system is specifically designed for neonatal parameters and is not intended for adult or general health assessment.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -270,16 +279,16 @@ export default function ClinicalLandingPage() {
               }
             ].map((workflow, index) => (
               <div key={index} className="relative">
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 shadow-xl text-white">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 text-2xl font-bold">
-                    {workflow.step}
+                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 shadow-2xl text-white transform transition-all hover:scale-105 hover:shadow-3xl border border-blue-400">
+                  <div className="w-20 h-20 bg-blue-400 bg-opacity-30 rounded-full flex items-center justify-center mb-5 shadow-xl border-4 border-blue-300 border-opacity-50">
+                    <span className="text-4xl font-black text-white drop-shadow-lg">{workflow.step}</span>
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{workflow.title}</h3>
-                  <p className="text-blue-100 leading-relaxed">{workflow.description}</p>
+                  <h3 className="text-2xl font-bold mb-3 tracking-tight">{workflow.title}</h3>
+                  <p className="text-blue-50 leading-relaxed text-base">{workflow.description}</p>
                 </div>
                 {index < 3 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ArrowRight className="w-8 h-8 text-blue-400" />
+                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                    <ArrowRight className="w-10 h-10 text-blue-300 drop-shadow-lg" strokeWidth={3} />
                   </div>
                 )}
               </div>
@@ -368,8 +377,8 @@ export default function ClinicalLandingPage() {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet the Development Team</h2>
-            <p className="text-xl text-gray-600">Passionate developers building clinical solutions</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">System Development & Research Team</h2>
+            <p className="text-xl text-gray-600">Dedicated researchers building clinical solutions</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
