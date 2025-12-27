@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Shield, Clock, TrendingUp, Users, Award, CheckCircle, ArrowRight, Activity, Brain, Database, Lock, History, Stethoscope, FileCheck, AlertCircle, Mail, Linkedin, Github, User, LogIn, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ClinicalLandingPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ export default function ClinicalLandingPage() {
     setIsAuthenticated(false);
   };
 
-  const handleStartAssessment = () => {
+/*   const handleStartAssessment = () => {
     if (isAuthenticated) {
       // Navigate to assessment page
       window.location.href = '/assessment';
@@ -45,11 +46,19 @@ export default function ClinicalLandingPage() {
       setShowAuthModal(true);
       setAuthMode('login');
     }
-  };
+  }; */
 
+  const handleStartAssessment = () => {
+     navigate('/HomePage');
+   };
+
+   
   const scrollToSection = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const navigate = useNavigate();
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
