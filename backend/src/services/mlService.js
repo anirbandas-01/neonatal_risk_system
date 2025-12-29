@@ -72,57 +72,67 @@ class MLServices {
         }
     }
 
-    generateRecommendations(riskLevel, parameters, clinicalFlags = []) {
-        const baseRecommendations = {
-            'Low Risk': [
-                'Continue routine monitoring and care',
-                'Maintain regular feeding schedule',
-                'Monitor weight gain progress',
-                'Schedule next check-up as per guidelines',
-                'Ensure proper sleep and rest'
-            ],
-            'Medium Risk': [
-                'Increase monitoring frequency to every 4-6 hours',
-                'Close observation of vital signs',
-                'Consider additional diagnostic tests',
-                'Ensure proper nutrition and hydration',
-                'Schedule follow-up within 24-48 hours',
-                'Keep detailed records of all parameters'
-            ],
-            'High Risk': [
-                'IMMEDIATE medical attention required',
-                'Continuous monitoring of vital signs',
-                'Prepare for possible intervention',
-                'Inform specialist team immediately',
-                'Keep in observation unit or NICU',
-                'Conduct comprehensive diagnostic tests',
-                'Ensure emergency equipment is ready'
-            ]
-        };
+generateRecommendations(riskLevel, parameters, clinicalFlags = []) {
+    const baseRecommendations = {
+        'Low Risk': [
+            'Continue routine monitoring and care',
+            'Maintain regular feeding schedule',
+            'Monitor weight gain progress',
+            'Schedule next check-up as per guidelines',
+            'Ensure proper sleep and rest'
+        ],
+        'Medium Risk': [
+            'Increase monitoring frequency to every 4-6 hours',
+            'Close observation of vital signs',
+            'Consider additional diagnostic tests',
+            'Ensure proper nutrition and hydration',
+            'Schedule follow-up within 24-48 hours',
+            'Keep detailed records of all parameters'
+        ],
+        'High Risk': [
+            'IMMEDIATE medical attention required',
+            'Continuous monitoring of vital signs',
+            'Prepare for possible intervention',
+            'Inform specialist team immediately',
+            'Keep in observation unit or NICU',
+            'Conduct comprehensive diagnostic tests',
+            'Ensure emergency equipment is ready'
+        ]
+    };
 
-        let recommendations = [...(baseRecommendations[riskLevel] || baseRecommendations['Medium Risk'])];
+    let recommendations = [...(baseRecommendations[riskLevel] || baseRecommendations['Medium Risk'])];
 
-        // Add specific recommendations based on clinical flags
-        const flagCodes = clinicalFlags.map(f => f.code);
+    const flagCodes = clinicalFlags.map(f => f.code);
 
-        if (flagCodes.includes("LOW_BIRTH_WEIGHT")) {
-            recommendations.push("Monitor for hypoglycemia and temperature instability");
-        }
-        if (flagCodes.includes("FEVER") || flagCodes.includes("HYPOTHERMIA")) {
-            recommendations.push("Check for signs of infection immediately");
-        }
-        if (flagCodes.includes("TACHYPNEA") || flagCodes.includes("LOW_OXYGEN")) {
-            recommendations.push("Ensure respiratory support availability");
-        }
-        if (flagCodes.includes("POOR_FEEDING")) {
-            recommendations.push("Consider supplemental feeding support");
-        }
-        if (flagCodes.includes("JAUNDICE_HIGH")) {
-            recommendations.push("Monitor bilirubin levels closely, consider phototherapy");
-        }
-
-        return recommendations;
+    if (flagCodes.includes("LOW_BIRTH_WEIGHT")) {
+        recommendations.push("Monitor for hypoglycemia and temperature instability");
     }
+    if (flagCodes.includes("FEVER") || flagCodes.includes("HYPOTHERMIA")) {
+        recommendations.push("Check for signs of infection immediately");
+    }
+    if (flagCodes.includes("TACHYPNEA") || flagCodes.includes("LOW_OXYGEN")) {
+        recommendations.push("Ensure respiratory support availability");
+    }
+    if (flagCodes.includes("POOR_FEEDING")) {
+        recommendations.push("Consider supplemental feeding support");
+    }
+    if (flagCodes.includes("JAUNDICE_HIGH")) {
+        recommendations.push("Monitor bilirubin levels closely, consider phototherapy");
+    }
+    
+    // 🆕 GENDER-SPECIFIC RECOMMENDATIONS
+    if (flagCodes.includes("MALE_LOW_BIRTH_WEIGHT") || flagCodes.includes("MALE_UNDERWEIGHT")) {
+        recommendations.push("Male infant below weight standards - increase feeding frequency and monitor growth curve");
+    }
+    if (flagCodes.includes("FEMALE_LOW_BIRTH_WEIGHT") || flagCodes.includes("FEMALE_UNDERWEIGHT")) {
+        recommendations.push("Female infant below weight standards - increase feeding frequency and monitor growth curve");
+    }
+    if (flagCodes.includes("MALE_MACROSOMIA") || flagCodes.includes("FEMALE_MACROSOMIA")) {
+        recommendations.push("Macrosomia detected - monitor for hypoglycemia and birth trauma complications");
+    }
+
+    return recommendations;
+}
 
     async checkHealth() {
         try {

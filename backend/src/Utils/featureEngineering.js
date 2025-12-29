@@ -6,23 +6,37 @@ function buildMLFeatures(babyInfo, healthParams, clinicalFlags) {
   const flagSet = clinicalFlags.map(f => f.code);
 
   return {
-    // Original numerical values (unchanged)
+    // 🔹 ORIGINAL FIELDS (keep these)
     gender: babyInfo.gender.toLowerCase(),
+    
+    gestational_age_weeks: healthParams.gestationalAgeWeeks,
     birth_weight_kg: healthParams.birthWeightKg,
     birth_length_cm: healthParams.birthLengthCm,
     birth_head_circumference_cm: healthParams.birthHeadCircumferenceCm,
+    
+    age_days: healthParams.ageDays,
+    weight_kg: healthParams.weightKg,
+    length_cm: healthParams.lengthCm,                           // ✅ ADD THIS
+    head_circumference_cm: healthParams.headCircumferenceCm,    // ✅ ADD THIS
+    
     temperature_c: healthParams.temperatureC,
     heart_rate_bpm: healthParams.heartRateBpm,
     respiratory_rate_bpm: healthParams.respiratoryRateBpm,
     oxygen_saturation: healthParams.oxygenSaturation,
-    jaundice_level_mg_dl: healthParams.jaundiceLevelMgDl,
-    age_days: healthParams.ageDays,
-    gestational_age_weeks: healthParams.gestationalAgeWeeks,
-    weight_kg: healthParams.weightKg,
+    
+    feeding_type: healthParams.feedingType,                     // ✅ ADD THIS
     feeding_frequency_per_day: healthParams.feedingFrequencyPerDay,
+    
+    urine_output_count: healthParams.urineOutputCount,          // ✅ ADD THIS
+    stool_count: healthParams.stoolCount,                       // ✅ ADD THIS
+    
+    jaundice_level_mg_dl: healthParams.jaundiceLevelMgDl,
     apgar_score: healthParams.apgarScore,
+    
+    immunizations_done: healthParams.immunizationsDone,         // ✅ ADD THIS
+    reflexes_normal: healthParams.reflexesNormal,               // ✅ ADD THIS
 
-    // Engineered binary features (0 or 1)
+    // 🔹 ENGINEERED BINARY FEATURES (keep these)
     low_birth_weight: flagSet.includes("LOW_BIRTH_WEIGHT") ? 1 : 0,
     fever: flagSet.includes("FEVER") ? 1 : 0,
     hypothermia: flagSet.includes("HYPOTHERMIA") ? 1 : 0,
@@ -35,7 +49,7 @@ function buildMLFeatures(babyInfo, healthParams, clinicalFlags) {
     abnormal_reflexes: flagSet.includes("ABNORMAL_REFLEXES") ? 1 : 0,
     excessive_weight_loss: flagSet.includes("EXCESSIVE_WEIGHT_LOSS") ? 1 : 0,
 
-    // Calculated features
+    // 🔹 CALCULATED FEATURES (keep these)
     weight_change_percent: ((healthParams.weightKg - healthParams.birthWeightKg) / healthParams.birthWeightKg) * 100
   };
 }

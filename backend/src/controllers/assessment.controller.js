@@ -54,7 +54,12 @@ exports.createOrUpdateAssessment = async (req, res) => {
 
     
     console.log('🩺 Applying medical rules...');
-    const clinicalFlags = neonatalRules(healthParameters);
+
+    const healthParamsWithGender = {
+  ...healthParameters,
+  gender: babyInfo.gender
+};
+    const clinicalFlags = neonatalRules(healthParamsWithGender);
     console.log('Clinical flags detected:', clinicalFlags);
 
     

@@ -150,7 +150,8 @@ const assessmentSchema = new mongoose.Schema({
           infection_risk: String,
           respiratory_risk: String,
           feeding_risk: String,
-          cardiovascular_risk: String
+          cardiovascular_risk: String,
+          growth_risk: String
       }  
     },
      doctorNotes: {
