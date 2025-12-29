@@ -9,168 +9,149 @@ const assessmentSchema = new mongoose.Schema({
     },
 
     healthParameters: {
-    gestationalAgeWeeks: {
-        type: Number,
-        required: true,
-        min: 22,
-        max: 42
-    },
+        gestationalAgeWeeks: {
+            type: Number,
+            required: true
+        },
 
-    birthWeightKg: {
-        type: Number,
-        required: true,
-        min: 1.0,
-        max: 6.0
-    },
+        birthWeightKg: {
+            type: Number,
+            required: true
+        },
 
-    birthLengthCm: {
-        type: Number,
-        required: true,
-        min: 35,
-        max: 60
-    },
+        birthLengthCm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    birthHeadCircumferenceCm: {
-        type: Number,
-        required: true,
-        min: 25,
-        max: 42
-    },
+        birthHeadCircumferenceCm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    ageDays: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 60
-    },
+        ageDays: {
+            type: Number,
+            required: true,
+            
+        },
 
-    weightKg: {
-        type: Number,
-        required: true,
-        min: 1.0,
-        max: 6.0
-    },
+        weightKg: {
+            type: Number,
+            required: true,
+            
+        },
 
-    lengthCm: {
-        type: Number,
-        required: true,
-        min: 35,
-        max: 65
-    },
+        lengthCm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    headCircumferenceCm: {
-        type: Number,
-        required: true,
-        min: 25,
-        max: 45
-    },
+        headCircumferenceCm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    temperatureC: {
-        type: Number,
-        required: true,
-        min: 35.0,
-        max: 40.0
-    },
+        temperatureC: {
+            type: Number,
+            required: true,
+            
+        },
 
-    heartRateBpm: {
-        type: Number,
-        required: true,
-        min: 80,
-        max: 200
-    },
+        heartRateBpm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    respiratoryRateBpm: {
-        type: Number,
-        required: true,
-        min: 20,
-        max: 80
-    },
+        respiratoryRateBpm: {
+            type: Number,
+            required: true,
+            
+        },
 
-    oxygenSaturation: {
-        type: Number,
-        required: true,
-        min: 70,
-        max: 100
-    },
+        oxygenSaturation: {
+            type: Number,
+            required: true,
+            
+        },
 
-    feedingType: {
-        type: String,
-        enum: ['breast', 'formula', 'mixed'],
-        required: true
-    },
+        feedingType: {
+            type: String,
+            enum: ['breast', 'formula', 'mixed'],
+            required: true
+        },
 
-    feedingFrequencyPerDay: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 20
-    },
+        feedingFrequencyPerDay: {
+            type: Number,
+            required: true,
+            
+        },
 
-    urineOutputCount: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 20
-    },
+        urineOutputCount: {
+            type: Number,
+            required: true,
+            
+        },
 
-    stoolCount: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 20
-    },
+        stoolCount: {
+            type: Number,
+            required: true,
+            
+        },
 
-    jaundiceLevelMgDl: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 25
-    },
+        jaundiceLevelMgDl: {
+            type: Number,
+            required: true,
+            
+        },
 
-    apgarScore: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 10
-    },
+        apgarScore: {
+            type: Number,
+            required: true,
+            
+        },
 
-    immunizationsDone: {
-        type: String,
-        enum: ['yes', 'no'],
-        required: true
-    },
+        immunizationsDone: {
+            type: String,
+            enum: ['yes', 'no'],
+            required: true
+        },
 
-    reflexesNormal: {
-        type: String,
-        enum: ['yes', 'no'],
-        required: true
-    }
+        reflexesNormal: {
+            type: String,
+            enum: ['yes', 'no'],
+            required: true
+        }
     },
 
     riskAssessment: {
         finalRisk: {
             type: String,
-            enum: ['Low Risk', 'Medium Risk', 'High Risk'],
             required: true
         },
         confidence: {
             type: Number,
             required: true,
-            min: 0,
-            max: 1
+            
         },
         recommendations: [{
             type: String
         }],
-        mlModelScore: {
-            type: Number
-        },
-        lstmModelScore: {
-            type: Number
-        },
-        ensembleScore: {
-            type: Number
-        }   
+        clinicalFlags: [{
+          code: String,
+          message: String,
+          severity: String
+       }],
+       specificRisks: {
+          infection_risk: String,
+          respiratory_risk: String,
+          feeding_risk: String,
+          cardiovascular_risk: String
+      }  
     },
      doctorNotes: {
         type: String,

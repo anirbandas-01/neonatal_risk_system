@@ -5,9 +5,10 @@ const ML_MODEL_URL = process.env.ML_MODEL_URL || 'http://localhost:9000';
 const buildMLPayload = require('../Utils/mlPayloadBuilder');
 
 class MLServices {
-    async predictRisk(babyInfo, healthParameters) {
+    async predictRisk(babyInfo, healthParameters, engineeredFeatures = null) {
         try {
-            const mlPayload = buildMLPayload(babyInfo, healthParameters);
+            // Use engineered features if provided, otherwise use original payload
+            const mlPayload = engineeredFeatures || buildMLPayload(babyInfo, healthParameters);
 
             console.log('Calling ML Model API...');
             console.log('URL:', `${ML_MODEL_URL}/predict`);
@@ -24,18 +25,13 @@ class MLServices {
 
             console.log('ML Model Response:', response.data);
             
-            // Transform ML model response to expected format
             const mlResponse = response.data;
             
-            // Check if response has the expected format
             if (mlResponse.finalRisk) {
-                // Already in correct format
                 return mlResponse;
             } else if (mlResponse.risk_level) {
-                // Transform from ML model format
                 console.log('Transforming ML response format...');
                 
-                // Map risk_level to finalRisk
                 let finalRisk;
                 const riskLevel = mlResponse.risk_level.toLowerCase();
                 
@@ -46,7 +42,7 @@ class MLServices {
                 } else if (riskLevel === 'high' || riskLevel === 'critical') {
                     finalRisk = 'High Risk';
                 } else {
-                    finalRisk = 'Medium Risk'; // Default
+                    finalRisk = 'Medium Risk';
                 }
                 
                 return {
@@ -60,8 +56,6 @@ class MLServices {
                  console.error('Invalid ML response format:', mlResponse);
                  throw new Error('Invalid ML response format');
             }
-
-            return response.data;
             
         } catch (error) {
             console.error('ML Model API Error:', error.message);
@@ -75,13 +69,11 @@ class MLServices {
             }
             
             throw new Error('ML model service failed');
-
         }
     }
 
-
-    generateRecommendations(riskLevel, parameters) {
-        const recommendations = {
+    generateRecommendations(riskLevel, parameters, clinicalFlags = []) {
+        const baseRecommendations = {
             'Low Risk': [
                 'Continue routine monitoring and care',
                 'Maintain regular feeding schedule',
@@ -108,7 +100,28 @@ class MLServices {
             ]
         };
 
-        return recommendations[riskLevel] || recommendations['Medium Risk'];
+        let recommendations = [...(baseRecommendations[riskLevel] || baseRecommendations['Medium Risk'])];
+
+        // Add specific recommendations based on clinical flags
+        const flagCodes = clinicalFlags.map(f => f.code);
+
+        if (flagCodes.includes("LOW_BIRTH_WEIGHT")) {
+            recommendations.push("Monitor for hypoglycemia and temperature instability");
+        }
+        if (flagCodes.includes("FEVER") || flagCodes.includes("HYPOTHERMIA")) {
+            recommendations.push("Check for signs of infection immediately");
+        }
+        if (flagCodes.includes("TACHYPNEA") || flagCodes.includes("LOW_OXYGEN")) {
+            recommendations.push("Ensure respiratory support availability");
+        }
+        if (flagCodes.includes("POOR_FEEDING")) {
+            recommendations.push("Consider supplemental feeding support");
+        }
+        if (flagCodes.includes("JAUNDICE_HIGH")) {
+            recommendations.push("Monitor bilirubin levels closely, consider phototherapy");
+        }
+
+        return recommendations;
     }
 
     async checkHealth() {

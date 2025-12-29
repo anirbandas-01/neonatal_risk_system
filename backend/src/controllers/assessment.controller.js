@@ -1,12 +1,12 @@
 const Baby = require('../models/Baby');
 const mlService = require('../services/mlService');
+const { neonatalRules, clinicalRiskInference } = require('../rules/neonatalRules');
+const buildMLFeatures = require('../Utils/featureEngineering');
 
 const normalize = (value) =>
   typeof value === 'string' ? value.toLowerCase() : value;
 
-/**
- * CREATE OR UPDATE ASSESSMENT
- */
+
 exports.createOrUpdateAssessment = async (req, res) => {
   try {
     const {
@@ -27,10 +27,10 @@ exports.createOrUpdateAssessment = async (req, res) => {
 
     console.log('Processing assessment for:', babyId);
 
-    // 1️⃣ Find baby
+
     let baby = await Baby.findOne({ babyId });
 
-    // 2️⃣ Create baby if not exists
+    
     if (!baby) {
       if (!babyInfo || !parentInfo) {
         return res.status(400).json({
@@ -47,30 +47,45 @@ exports.createOrUpdateAssessment = async (req, res) => {
       });
     }
 
-    // 3️⃣ Normalize enums
+    
     healthParameters.feedingType = normalize(healthParameters.feedingType);
     healthParameters.immunizationsDone = normalize(healthParameters.immunizationsDone);
     healthParameters.reflexesNormal = normalize(healthParameters.reflexesNormal);
 
-    // 4️⃣ ML prediction
+    
+    console.log('🩺 Applying medical rules...');
+    const clinicalFlags = neonatalRules(healthParameters);
+    console.log('Clinical flags detected:', clinicalFlags);
+
+    
+    console.log('🧬 Building ML features...');
+    const engineeredFeatures = buildMLFeatures(babyInfo,healthParameters, clinicalFlags);
+    console.log('Engineered features:', engineeredFeatures);
+
+    console.log("🚀 Final ML payload (about to send to ML):");
+    console.log(engineeredFeatures);
+
+    
+    const specificRisks = clinicalRiskInference(clinicalFlags);
+    console.log('Specific risks:', specificRisks);
+
+    
     let mlPrediction;
     try {
       mlPrediction = await mlService.predictRisk(
         baby.babyInfo,
-        healthParameters
+        healthParameters,
+        engineeredFeatures  
       );
     } catch (err) {
-      console.error('ML error, using fallback');
-      mlPrediction = {
-        finalRisk: 'Medium Risk',
-        confidence: 0.5,
-        mlScore: 50,
-        lstmScore: 50,
-        ensembleScore: 50
-      };
+       return res.status(502).json({
+    success: false,
+    message: 'ML model prediction failed',
+    error: err.message
+  });
     }
 
-    // 5️⃣ Create assessment
+    
     const newAssessment = {
       assessmentDate: assessmentDate || new Date(),
       healthParameters,
@@ -79,16 +94,25 @@ exports.createOrUpdateAssessment = async (req, res) => {
         confidence: mlPrediction.confidence,
         recommendations: mlService.generateRecommendations(
           mlPrediction.finalRisk,
-          healthParameters
+          healthParameters,
+          clinicalFlags 
         ),
         mlModelScore: mlPrediction.mlScore,
         lstmModelScore: mlPrediction.lstmScore,
-        ensembleScore: mlPrediction.ensembleScore
+        ensembleScore: mlPrediction.ensembleScore,
+        
+        
+clinicalFlags: clinicalFlags.map(f => ({
+  code: f.code,
+  message: f.message,
+  severity: f.severity
+})),
+specificRisks: specificRisks
       },
       doctorNotes: doctorNotes || ''
     };
 
-    // 6️⃣ Push & save
+    
     baby.assessments.push(newAssessment);
     await baby.save();
 
@@ -103,7 +127,14 @@ exports.createOrUpdateAssessment = async (req, res) => {
         babyId: baby.babyId,
         babyInfo: baby.babyInfo,
         totalVisits: baby.totalVisits,
-        latestAssessment
+        latestAssessment,
+        
+        
+        clinicalSummary: {
+          flagsDetected: clinicalFlags.length,
+          highSeverityFlags: clinicalFlags.filter(f => f.severity === 'high').length,
+          specificRisks: specificRisks
+        }
       }
     });
 
@@ -118,9 +149,7 @@ exports.createOrUpdateAssessment = async (req, res) => {
   }
 };
 
-/**
- * GET BABY HISTORY
- */
+
 exports.getBabyHistory = async (req, res) => {
   try {
     const { babyId } = req.params;
@@ -138,9 +167,6 @@ exports.getBabyHistory = async (req, res) => {
   }
 };
 
-/**
- * GET ASSESSMENT BY ID
- */
 exports.getAssessmentById = async (req, res) => {
   try {
     const { assessmentId } = req.params;

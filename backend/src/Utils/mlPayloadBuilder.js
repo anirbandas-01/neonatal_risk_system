@@ -1,6 +1,6 @@
-function buildMLPayload(babyInfo, health) {
+function buildMLPayload(health) {
     return {
-        gender: babyInfo.gender.toLowerCase(),
+        gender: health.gender.toLowerCase(),
 
         gestational_age_weeks: health.gestationalAgeWeeks,
         birth_weight_kg: health.birthWeightKg,
