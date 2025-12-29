@@ -79,7 +79,7 @@ function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/HomePage')}
             className="flex items-center text-blue-600 hover:text-blue-700 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />

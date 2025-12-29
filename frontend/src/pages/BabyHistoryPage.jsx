@@ -32,7 +32,11 @@ function BabyHistoryPage() {
   };
 
   const handleAddAssessment = () => {
-    navigate('/assessment', { state: { baby } });
+    navigate('/assessment', {
+        state: {
+           baby,
+           from: `/baby/${baby.babyId}/history`
+           } });
   };
 
   const handleViewAssessment = (assessment) => {

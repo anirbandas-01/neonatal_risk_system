@@ -11,6 +11,9 @@ import { assessmentAPI, babyAPI } from '../services/api';
 function AssessmentFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const from = location.state?.from || '/HomePage';
+
   
   const existingBaby = location.state?.baby;
   
@@ -338,11 +341,12 @@ function AssessmentFormPage() {
         {/* Header with playful design */}
         <div className="mb-8">
           <button
-            onClick={() => navigate('/')}
+            //onClick={() => navigate('/HomePage')}
+            onClick={() => navigate(from)}
             className="flex items-center text-purple-600 hover:text-purple-700 mb-4 transition-colors font-semibold"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Home
+            Back to Previous Page
           </button>
           
           <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-3xl shadow-2xl p-8 relative overflow-hidden">

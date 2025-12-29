@@ -72,7 +72,10 @@ function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* New Assessment Card */}
-            <Link to="/assessment" className="group">
+            <Link 
+                to="/assessment"
+                state={{ from: '/HomePage' }}
+                className="group">
               <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-500 h-full flex flex-col">
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6">
                   <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
