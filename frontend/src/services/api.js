@@ -70,4 +70,51 @@ export const assessmentAPI = {
   }
 };
 
+
+export const prescriptionAPI = {
+  // Create new prescription
+  create: async (data) => {
+    const response = await api.post('/prescription/create', data);
+    return response.data;
+  },
+  
+  // Get prescription by ID
+  getById: async (prescriptionId) => {
+    const response = await api.get(`/prescription/${prescriptionId}`);
+    return response.data;
+  },
+  
+  // Get all prescriptions for a baby
+  getByBaby: async (babyId) => {
+    const response = await api.get(`/prescription/baby/${babyId}`);
+    return response.data;
+  },
+  
+  // Get prescription by assessment ID
+  getByAssessment: async (assessmentId) => {
+    const response = await api.get(`/prescription/assessment/${assessmentId}`);
+    return response.data;
+  },
+  
+  // Update prescription
+  update: async (prescriptionId, data) => {
+    const response = await api.put(`/prescription/${prescriptionId}`, data);
+    return response.data;
+  },
+  
+  // Delete prescription
+  delete: async (prescriptionId) => {
+    const response = await api.delete(`/prescription/${prescriptionId}`);
+    return response.data;
+  },
+  
+  // Download prescription PDF
+  downloadPDF: async (prescriptionId) => {
+    const response = await api.get(`/prescription/${prescriptionId}/download`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+};
+
 export default api;

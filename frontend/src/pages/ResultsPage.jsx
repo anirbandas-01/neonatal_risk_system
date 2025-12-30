@@ -433,6 +433,16 @@ const ResultsPage = () => {
             Add Follow-up Assessment
           </button> */}
           <button 
+                onClick={() => navigate(`/prescription/create/${assessmentData._id}`, {
+                  state: { assessmentData }
+                })}
+                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
+              >
+                <FileText className="w-6 h-6 mr-2" />
+                Create Prescription
+          </button>
+
+          <button 
             onClick={goToDashboard}
             className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl"
           >

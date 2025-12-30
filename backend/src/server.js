@@ -1,24 +1,28 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 require('dotenv').config();
 
 
 const assessmentRoutes = require('./routes/assessment');
+const prescriptionRoutes = require('./routes/prescription');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
 });
 
+
+app.use('/api/prescription', prescriptionRoutes);
 app.use('/api', assessmentRoutes);
 
 app.get('/health', (req, res)=> {
@@ -38,7 +42,10 @@ app.get('/', (req, res) => {
       createAssessment: 'POST /api/assess',
       getAssessment: 'GET /api/assess/:babyId',
       getAllAssessments: 'GET /api/assessments',
-      getStatistics: 'GET /api/assessments/stats'
+      getStatistics: 'GET /api/assessments/stats',
+      createPrescription: 'POST /api/prescription/create',
+      getPrescription: 'GET /api/prescription/:prescriptionId', 
+      downloadPrescription: 'GET /api/prescription/:prescriptionId/download'
     }
   });
 });

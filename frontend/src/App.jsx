@@ -6,6 +6,8 @@ import TestPage from './pages/TestPage';
 import ResultsPage from './pages/ResultsPage';
 import BabyHistoryPage from './pages/BabyHistoryPage';
 import ClinicalLandingPage from './pages/ClinicalLandingPage';
+import PrescriptionFormPage from './pages/PrescriptionFormPage';
+import PrescriptionViewPage from './pages/PrescriptionViewPage';
 
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route path="/test" element={<TestPage />} />
         <Route path='/results' element={<ResultsPage  />}/>
         <Route path="/baby/:babyId/history" element={<BabyHistoryPage />} />
+        <Route path='/prescription/create/:assessmentId' element={<PrescriptionFormPage />}/>
+        <Route path='/prescription/:prescriptionId/view' element={<PrescriptionViewPage />}/>
       </Routes>
     </Router>
   );
