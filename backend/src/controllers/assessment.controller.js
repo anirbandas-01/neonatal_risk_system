@@ -131,6 +131,7 @@ specificRisks: specificRisks
       data: {
         babyId: baby.babyId,
         babyInfo: baby.babyInfo,
+        parentInfo: baby.parentInfo,
         totalVisits: baby.totalVisits,
         latestAssessment,
         

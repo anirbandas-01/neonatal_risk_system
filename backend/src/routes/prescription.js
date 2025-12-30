@@ -1,45 +1,48 @@
-console.log('✅ prescription routes file loaded');
-
 const express = require('express');
 const prescriptionController = require('../controllers/prescription.controller');
 
 const router = express.Router();
 
+console.log('✅ Prescription routes loaded');
 
+// Create new prescription
+router.post('/create', (req, res, next) => {
+    console.log('📝 POST /api/prescription/create called');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    prescriptionController.createPrescription(req, res, next);
+});
 
-/* // Create new prescription
-router.post('/create', prescriptionController.createPrescription);
+// STATIC ROUTES FIRST (to avoid conflicts with :prescriptionId)
+router.get('/baby/:babyId', (req, res, next) => {
+    console.log('📋 GET /api/prescription/baby/:babyId called');
+    prescriptionController.getPrescriptionsByBaby(req, res, next);
+});
 
-// Get prescription by ID
-router.get('/:prescriptionId', prescriptionController.getPrescriptionById);
+router.get('/assessment/:assessmentId', (req, res, next) => {
+    console.log('📋 GET /api/prescription/assessment/:assessmentId called');
+    prescriptionController.getPrescriptionByAssessment(req, res, next);
+});
 
-// Get all prescriptions for a baby
-router.get('/baby/:babyId', prescriptionController.getPrescriptionsByBaby);
+// DOWNLOAD (specific route before generic :prescriptionId)
+router.get('/:prescriptionId/download', (req, res, next) => {
+    console.log('📥 GET /api/prescription/:prescriptionId/download called');
+    prescriptionController.downloadPrescriptionPDF(req, res, next);
+});
 
-// Get prescription by assessment ID
-router.get('/assessment/:assessmentId', prescriptionController.getPrescriptionByAssessment);
+// GENERIC CRUD (these come last to avoid conflicts)
+router.get('/:prescriptionId', (req, res, next) => {
+    console.log('📋 GET /api/prescription/:prescriptionId called');
+    prescriptionController.getPrescriptionById(req, res, next);
+});
 
-// Update prescription
-router.put('/:prescriptionId', prescriptionController.updatePrescription);
+router.put('/:prescriptionId', (req, res, next) => {
+    console.log('✏️ PUT /api/prescription/:prescriptionId called');
+    prescriptionController.updatePrescription(req, res, next);
+});
 
-// Delete prescription
-router.delete('/:prescriptionId', prescriptionController.deletePrescription);
-
-// Download prescription PDF
-router.get('/:prescriptionId/download', prescriptionController.downloadPrescriptionPDF); */
-
-router.post('/create', prescriptionController.createPrescription);
-
-// STATIC ROUTES FIRST
-router.get('/baby/:babyId', prescriptionController.getPrescriptionsByBaby);
-router.get('/assessment/:assessmentId', prescriptionController.getPrescriptionByAssessment);
-
-// DOWNLOAD (specific before generic)
-router.get('/:prescriptionId/download', prescriptionController.downloadPrescriptionPDF);
-
-// CRUD
-router.get('/:prescriptionId', prescriptionController.getPrescriptionById);
-router.put('/:prescriptionId', prescriptionController.updatePrescription);
-router.delete('/:prescriptionId', prescriptionController.deletePrescription);
+router.delete('/:prescriptionId', (req, res, next) => {
+    console.log('🗑️ DELETE /api/prescription/:prescriptionId called');
+    prescriptionController.deletePrescription(req, res, next);
+});
 
 module.exports = router;

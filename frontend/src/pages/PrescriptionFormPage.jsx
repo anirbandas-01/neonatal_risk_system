@@ -15,7 +15,7 @@ export default function PrescriptionFormPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-
+  
   // Doctor Information (in real app, get from auth)
   const [doctorInfo, setDoctorInfo] = useState({
     name: localStorage.getItem('doctorName') || 'Dr. Smith',
@@ -42,11 +42,17 @@ export default function PrescriptionFormPage() {
   const [advice, setAdvice] = useState('');
 
   useEffect(() => {
+    console.log('🔍 Assessment Data:', assessmentData);
+  console.log('🔍 Assessment ID from params:', assessmentId);
     if (assessmentData) {
       // Auto-generate diagnosis summary from assessment
       generateDiagnosisSummary();
+      if (!assessmentId && !assessmentData._id) {
+      console.error('❌ No assessment ID found!');
+      setError('Assessment ID is missing');
     }
-  }, [assessmentData]);
+    }
+  }, [assessmentData, assessmentId]);
 
   const generateDiagnosisSummary = () => {
     if (!assessmentData) return;
@@ -127,7 +133,7 @@ export default function PrescriptionFormPage() {
     return true;
   };
 
-  const handleSubmit = async (e) => {
+/*   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -176,7 +182,73 @@ export default function PrescriptionFormPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }; */
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!assessmentData) {
+      setError('Assessment data not found');
+      return;
+    }
+
+    // Get the correct assessment ID
+    const actualAssessmentId = assessmentId || assessmentData._id || assessmentData.id;
+    
+    if (!actualAssessmentId) {
+      setError('Assessment ID is missing. Please go back and select the assessment again.');
+      return;
+    }
+
+    console.log('📝 Creating prescription with assessment ID:', actualAssessmentId);
+
+    setLoading(true);
+
+    try {
+      const prescriptionData = {
+        doctor: doctorInfo,
+        patient: {
+          baby_id: assessmentData.babyId,
+          name: assessmentData.babyInfo.name,
+          age_days: assessmentData.healthParameters.ageDays,
+          gender: assessmentData.babyInfo.gender,
+          parent_phone: assessmentData.parentInfo?.contactNumber || 'N/A',
+          parent_email: assessmentData.parentInfo?.email || ''
+        },
+        assessment_id: actualAssessmentId,
+        diagnosis_summary: diagnosisSummary,
+        medicines: medicines,
+        advice: advice
+      };
+
+      console.log('📤 Sending prescription data:', JSON.stringify(prescriptionData, null, 2));
+
+      const response = await axios.post(`${API_BASE_URL}/prescription/create`, prescriptionData);
+
+      console.log('✅ Prescription created successfully:', response.data);
+
+      if (response.data.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate(`/prescription/${response.data.data._id}/view`, {
+            state: { prescription: response.data.data }
+          });
+        }, 1500);
+      }
+
+    } catch (err) {
+      console.error('❌ Prescription creation error:', err);
+      console.error('Error details:', err.response?.data);
+      setError(err.response?.data?.message || err.message || 'Failed to create prescription');
+    } finally {
+      setLoading(false);
+    }
+};
 
   if (!assessmentData) {
     return (
