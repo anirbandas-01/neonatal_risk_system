@@ -447,7 +447,7 @@ const ResultsPage = () => {
                 
                 console.log('✅ Navigating with Assessment ID:', assessmentIdToUse);
                 
-                navigate(`/prescription/create/${assessmentIdToUse}`, {
+/*                 navigate(`/prescription/create/${assessmentIdToUse}`, {
                   state: { 
                     assessmentData: {
                       ...assessmentData,
@@ -458,6 +458,12 @@ const ResultsPage = () => {
                       healthParameters: assessmentData.healthParameters,
                       riskAssessment: assessmentData.riskAssessment
                     }
+                  }
+                }); */
+                console.log('Assessment sent to Prescription:', assessmentData);
+                navigate(`/prescription/create/${assessmentIdToUse}`, {
+                  state: { 
+                    assessmentData: assessmentData
                   }
                 });
               }}
