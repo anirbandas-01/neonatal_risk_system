@@ -207,7 +207,7 @@ useEffect(() => {
     }
 
     // Get the correct assessment ID
-    const actualAssessmentId = assessmentId || assessmentData._id || assessmentData.id;
+    const actualAssessmentId = assessmentId || assessmentData._id || assessmentData.assessmentId || assessmentData.assessment?._id || assessmentData.latestAssessment?._id;
     
     if (!actualAssessmentId) {
       setError('Assessment ID is missing. Please go back and select the assessment again.');

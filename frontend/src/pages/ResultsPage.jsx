@@ -21,6 +21,17 @@ const ResultsPage = () => {
   }
 }, [location.state]);
 
+React.useEffect(() => {
+  if (assessmentData) {
+    console.log('📊 ResultsPage received assessmentData:');
+    console.log('Full object:', assessmentData);
+    console.log('Has _id?', assessmentData._id);
+    console.log('Has assessment._id?', assessmentData.assessment?._id);
+    console.log('Has latestAssessment._id?', assessmentData.latestAssessment?._id);
+    console.log('Available keys:', Object.keys(assessmentData));
+  }
+}, [assessmentData]);
+
 
   const getSeverityBadge = (risk) => {
     const badges = {
@@ -432,7 +443,7 @@ const ResultsPage = () => {
             <Plus className="w-6 h-6 mr-2" />
             Add Follow-up Assessment
           </button> */}
-           <button 
+{/*            <button 
               onClick={() => {
                 // Get the assessment ID from the response data structure
                 const assessmentIdToUse = assessmentData.latestAssessment?._id || 
@@ -447,7 +458,7 @@ const ResultsPage = () => {
                 
                 console.log('✅ Navigating with Assessment ID:', assessmentIdToUse);
                 
-/*                 navigate(`/prescription/create/${assessmentIdToUse}`, {
+                 navigate(`/prescription/create/${assessmentIdToUse}`, {
                   state: { 
                     assessmentData: {
                       ...assessmentData,
@@ -459,7 +470,7 @@ const ResultsPage = () => {
                       riskAssessment: assessmentData.riskAssessment
                     }
                   }
-                }); */
+                }); 
                 console.log('Assessment sent to Prescription:', assessmentData);
                 navigate(`/prescription/create/${assessmentIdToUse}`, {
                   state: { 
@@ -471,7 +482,54 @@ const ResultsPage = () => {
             >
               <FileText className="w-6 h-6 mr-2" />
               Create Prescription
-          </button>
+          </button> */}
+         <button 
+  onClick={() => {
+    // Get the assessment ID - check multiple possible locations
+    let assessmentIdToUse = null;
+    
+    // Method 1: From the assessment object passed from BabyHistoryPage
+    if (assessmentData._id) {
+      assessmentIdToUse = assessmentData._id;
+    }
+    // Method 2: From the assessment object inside assessmentData
+    else if (assessmentData.assessment && assessmentData.assessment._id) {
+      assessmentIdToUse = assessmentData.assessment._id;
+    }
+    // Method 3: Try to extract from nested structure
+    else if (assessmentData.latestAssessment && assessmentData.latestAssessment._id) {
+      assessmentIdToUse = assessmentData.latestAssessment._id;
+    }
+    
+    if (!assessmentIdToUse) {
+      console.error('❌ Could not find assessment ID. Data structure:', assessmentData);
+      alert('Unable to create prescription. Assessment ID not found.');
+      return;
+    }
+    
+    console.log('✅ Using assessment ID:', assessmentIdToUse);
+    
+    navigate(`/prescription/create/${assessmentIdToUse}`, {
+      state: { 
+        assessmentData: {
+          ...assessmentData,
+          // Ensure all required data is present
+          babyId: assessmentData.babyId,
+          babyInfo: assessmentData.babyInfo,
+          parentInfo: assessmentData.parentInfo || {},
+          healthParameters: assessmentData.healthParameters,
+          riskAssessment: assessmentData.riskAssessment,
+          // Make sure the ID is explicitly set
+          assessmentId: assessmentIdToUse
+        }
+      }
+    });
+  }}
+  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
+>
+  <FileText className="w-6 h-6 mr-2" />
+  Create Prescription
+</button> 
 
 
           <button 

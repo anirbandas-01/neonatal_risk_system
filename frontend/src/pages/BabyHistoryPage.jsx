@@ -48,7 +48,9 @@ function BabyHistoryPage() {
           assessmentDate: assessment.assessmentDate,
           healthParameters: assessment.healthParameters,
           riskAssessment: assessment.riskAssessment,
-          doctorNotes: assessment.doctorNotes
+          doctorNotes: assessment.doctorNotes,
+          _id: assessment._id,
+          assessment: assessment
         }
       }
     });

@@ -300,7 +300,7 @@ function DashboardPage() {
                             <div>
                               <span className="text-gray-500">Weight:</span>{' '}
                               <span className="font-semibold">
-                                {baby.assessments[0].healthParameters.birthWeight} kg
+                                 {baby.assessments[0].healthParameters.weightKg} kg 
                               </span>
                             </div>
                             <div>
