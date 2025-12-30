@@ -4,7 +4,7 @@ import { ArrowLeft, Save, AlertCircle, CheckCircle, Search, Plus, Baby, Sparkles
 import BabyInfoForm from '../components/BabyInfoForm';
 import InputField from '../components/InputField';
 import SelectField from '../components/SelectField';
-import { validateField, validationRanges, normalRanges } from '../utils/validation';
+// REMOVE validation imports
 import { generateBabyId, formatDate } from '../utils/helpers';
 import { assessmentAPI, babyAPI } from '../services/api';
 
@@ -127,6 +127,7 @@ function AssessmentFormPage() {
     });
   };
 
+  // SIMPLIFIED: Just update value, no validation
   const handleHealthParamChange = (e) => {
     const { name, value } = e.target;
     
@@ -135,22 +136,12 @@ function AssessmentFormPage() {
       [name]: value
     }));
     
-    if (validationRanges[name]) {
-      const validation = validateField(name, value);
-      
-      if (!validation.isValid) {
-        setErrors(prev => ({
-          ...prev,
-          [name]: validation.message
-        }));
-      } else {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors[name];
-          return newErrors;
-        });
-      }
-    }
+    // Clear any error for this field
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[name];
+      return newErrors;
+    });
   };
 
   const validateBabyInfo = () => {
@@ -169,17 +160,22 @@ function AssessmentFormPage() {
     return { babyErrors, parentErrors };
   };
 
+  // SIMPLIFIED: Only check if fields are filled, not if values are valid
   const validateHealthParameters = () => {
     const paramErrors = {};
     
-    Object.keys(validationRanges).forEach(field => {
+    // List of all required health parameter fields
+    const requiredFields = [
+      'gestationalAgeWeeks', 'birthWeightKg', 'birthLengthCm', 'birthHeadCircumferenceCm',
+      'ageDays', 'weightKg', 'lengthCm', 'headCircumferenceCm',
+      'temperatureC', 'heartRateBpm', 'respiratoryRateBpm', 'oxygenSaturation',
+      'feedingFrequencyPerDay', 'urineOutputCount', 'stoolCount',
+      'jaundiceLevelMgDl', 'apgarScore'
+    ];
+    
+    requiredFields.forEach(field => {
       if (!healthParameters[field] || healthParameters[field] === '') {
         paramErrors[field] = 'This field is required';
-      } else {
-        const validation = validateField(field, healthParameters[field]);
-        if (!validation.isValid) {
-          paramErrors[field] = validation.message;
-        }
       }
     });
     
@@ -209,6 +205,8 @@ function AssessmentFormPage() {
     
     const paramErrors = validateHealthParameters();
     
+   
+
     if (Object.keys(paramErrors).length > 0) {
       setErrors(paramErrors);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -260,6 +258,9 @@ function AssessmentFormPage() {
       setSubmitSuccess(true);
       
       setTimeout(() => {
+        
+        const assessmentId = response.data.latestAssessment._id;
+
         navigate('/results', { 
           state: { 
             assessmentData: {
@@ -268,7 +269,9 @@ function AssessmentFormPage() {
               assessmentDate: response.data.latestAssessment.assessmentDate,
               healthParameters: response.data.latestAssessment.healthParameters,
               riskAssessment: response.data.latestAssessment.riskAssessment,
-              doctorNotes: response.data.latestAssessment.doctorNotes
+              doctorNotes: response.data.latestAssessment.doctorNotes,
+              _id: assessmentId,
+              latestAssessment: response.data.latestAssessment
             }
           } 
         });
@@ -549,7 +552,7 @@ function AssessmentFormPage() {
           </div>
         )}
 
-        {/* STEP 3: Health Parameters Form - Continued in next artifact due to length */}
+        {/* STEP 3: Health Parameters Form */}
         {step === 3 && (
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -721,9 +724,7 @@ function AssessmentFormPage() {
                         error={errors.gestationalAgeWeeks}
                         placeholder="38"
                         unit="weeks"
-                        min={normalRanges.gestationalAgeWeeks.min}
-                        max={normalRanges.gestationalAgeWeeks.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Birth Weight"
@@ -733,8 +734,7 @@ function AssessmentFormPage() {
                         error={errors.birthWeightKg}
                         placeholder="3.2"
                         unit="kg"
-                        min={normalRanges.birthWeightKg.min}
-                        max={normalRanges.birthWeightKg.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Birth Length"
@@ -744,8 +744,7 @@ function AssessmentFormPage() {
                         error={errors.birthLengthCm}
                         placeholder="50"
                         unit="cm"
-                        min={normalRanges.birthLengthCm.min}
-                        max={normalRanges.birthLengthCm.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Birth Head Circumference"
@@ -755,8 +754,7 @@ function AssessmentFormPage() {
                         error={errors.birthHeadCircumferenceCm}
                         placeholder="34"
                         unit="cm"
-                        min={normalRanges.birthHeadCircumferenceCm.min}
-                        max={normalRanges.birthHeadCircumferenceCm.max}
+                        // REMOVED min/max props
                       />
                     </div>
                   </div>
@@ -776,9 +774,7 @@ function AssessmentFormPage() {
                         error={errors.ageDays}
                         placeholder="5"
                         unit="days"
-                        min={normalRanges.ageDays.min}
-                        max={normalRanges.ageDays.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Current Weight"
@@ -788,8 +784,7 @@ function AssessmentFormPage() {
                         error={errors.weightKg}
                         placeholder="3.1"
                         unit="kg"
-                        min={normalRanges.weightKg.min}
-                        max={normalRanges.weightKg.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Current Length"
@@ -799,8 +794,7 @@ function AssessmentFormPage() {
                         error={errors.lengthCm}
                         placeholder="50.5"
                         unit="cm"
-                        min={normalRanges.lengthCm.min}
-                        max={normalRanges.lengthCm.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Current Head Circumference"
@@ -810,8 +804,7 @@ function AssessmentFormPage() {
                         error={errors.headCircumferenceCm}
                         placeholder="34.2"
                         unit="cm"
-                        min={normalRanges.headCircumferenceCm.min}
-                        max={normalRanges.headCircumferenceCm.max}
+                        // REMOVED min/max props
                       />
                     </div>
                   </div>
@@ -831,8 +824,7 @@ function AssessmentFormPage() {
                         error={errors.temperatureC}
                         placeholder="36.8"
                         unit="°C"
-                        min={normalRanges.temperatureC.min}
-                        max={normalRanges.temperatureC.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Heart Rate"
@@ -842,9 +834,7 @@ function AssessmentFormPage() {
                         error={errors.heartRateBpm}
                         placeholder="140"
                         unit="bpm"
-                        min={normalRanges.heartRateBpm.min}
-                        max={normalRanges.heartRateBpm.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Respiratory Rate"
@@ -854,9 +844,7 @@ function AssessmentFormPage() {
                         error={errors.respiratoryRateBpm}
                         placeholder="40"
                         unit="bpm"
-                        min={normalRanges.respiratoryRateBpm.min}
-                        max={normalRanges.respiratoryRateBpm.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Oxygen Saturation"
@@ -866,8 +854,7 @@ function AssessmentFormPage() {
                         error={errors.oxygenSaturation}
                         placeholder="98"
                         unit="%"
-                        min={normalRanges.oxygenSaturation.min}
-                        max={normalRanges.oxygenSaturation.max}
+                        // REMOVED min/max props
                       />
                     </div>
                   </div>
@@ -899,9 +886,7 @@ function AssessmentFormPage() {
                         error={errors.feedingFrequencyPerDay}
                         placeholder="8"
                         unit="times/day"
-                        min={normalRanges.feedingFrequencyPerDay.min}
-                        max={normalRanges.feedingFrequencyPerDay.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Urine Output Count"
@@ -911,9 +896,7 @@ function AssessmentFormPage() {
                         error={errors.urineOutputCount}
                         placeholder="6"
                         unit="times/day"
-                        min={normalRanges.urineOutputCount.min}
-                        max={normalRanges.urineOutputCount.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="Stool Count"
@@ -923,9 +906,7 @@ function AssessmentFormPage() {
                         error={errors.stoolCount}
                         placeholder="4"
                         unit="times/day"
-                        min={normalRanges.stoolCount.min}
-                        max={normalRanges.stoolCount.max}
-                        step="1"
+                        // REMOVED min/max props
                       />
                     </div>
                   </div>
@@ -945,8 +926,7 @@ function AssessmentFormPage() {
                         error={errors.jaundiceLevelMgDl}
                         placeholder="8.5"
                         unit="mg/dL"
-                        min={normalRanges.jaundiceLevelMgDl.min}
-                        max={normalRanges.jaundiceLevelMgDl.max}
+                        // REMOVED min/max props
                       />
                       <InputField
                         label="APGAR Score"
@@ -956,9 +936,7 @@ function AssessmentFormPage() {
                         error={errors.apgarScore}
                         placeholder="9"
                         unit=""
-                        min={0}
-                        max={10}
-                        step="1"
+                        // REMOVED min/max props
                       />
                     </div>
                   </div>
@@ -1070,7 +1048,7 @@ function AssessmentFormPage() {
                       </li>
                       <li className="flex items-start">
                         <span className="mr-2">📊</span>
-                        Values must be within valid ranges
+                        Enter measured values exactly as observed
                       </li>
                       <li className="flex items-start">
                         <span className="mr-2">🔍</span>
