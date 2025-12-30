@@ -41,18 +41,27 @@ export default function PrescriptionFormPage() {
   // Medical Advice
   const [advice, setAdvice] = useState('');
 
-  useEffect(() => {
-    console.log('🔍 Assessment Data:', assessmentData);
-  console.log('🔍 Assessment ID from params:', assessmentId);
-    if (assessmentData) {
-      // Auto-generate diagnosis summary from assessment
-      generateDiagnosisSummary();
-      if (!assessmentId && !assessmentData._id) {
-      console.error('❌ No assessment ID found!');
-      setError('Assessment ID is missing');
+useEffect(() => {
+  console.log('🔍 Prescription Form Page Loaded');
+  console.log('📋 Assessment Data:', assessmentData);
+  console.log('🆔 Assessment ID from params:', assessmentId);
+  
+  if (assessmentData) {
+    // Auto-generate diagnosis summary from assessment
+    generateDiagnosisSummary();
+    
+    // Validate we have an assessment ID
+    const actualAssessmentId = assessmentId || assessmentData._id || assessmentData.id;
+    
+    if (!actualAssessmentId) {
+      console.error('❌ CRITICAL: No assessment ID found!');
+      console.error('Assessment Data Structure:', JSON.stringify(assessmentData, null, 2));
+      setError('Assessment ID is missing. Please go back and try again.');
+    } else {
+      console.log('✅ Valid Assessment ID:', actualAssessmentId);
     }
-    }
-  }, [assessmentData, assessmentId]);
+  }
+}, [assessmentData, assessmentId]);
 
   const generateDiagnosisSummary = () => {
     if (!assessmentData) return;
@@ -202,6 +211,8 @@ export default function PrescriptionFormPage() {
     
     if (!actualAssessmentId) {
       setError('Assessment ID is missing. Please go back and select the assessment again.');
+       console.error('❌ Invalid Assessment ID:', actualAssessmentId);
+    console.error('📋 Assessment Data:', assessmentData);
       return;
     }
 
@@ -211,20 +222,20 @@ export default function PrescriptionFormPage() {
 
     try {
       const prescriptionData = {
-        doctor: doctorInfo,
-        patient: {
-          baby_id: assessmentData.babyId,
-          name: assessmentData.babyInfo.name,
-          age_days: assessmentData.healthParameters.ageDays,
-          gender: assessmentData.babyInfo.gender,
-          parent_phone: assessmentData.parentInfo?.contactNumber || 'N/A',
-          parent_email: assessmentData.parentInfo?.email || ''
-        },
-        assessment_id: actualAssessmentId,
-        diagnosis_summary: diagnosisSummary,
-        medicines: medicines,
-        advice: advice
-      };
+      doctor: doctorInfo,
+      patient: {
+        baby_id: assessmentData.babyId,
+        name: assessmentData.babyInfo.name,
+        age_days: assessmentData.healthParameters.ageDays,
+        gender: assessmentData.babyInfo.gender,
+        parent_phone: assessmentData.parentInfo?.contactNumber || 'N/A',
+        parent_email: assessmentData.parentInfo?.email || ''
+      },
+      assessment_id: actualAssessmentId,  // ✅ Correct ID here
+      diagnosis_summary: diagnosisSummary,
+      medicines: medicines,
+      advice: advice
+    };
 
       console.log('📤 Sending prescription data:', JSON.stringify(prescriptionData, null, 2));
 

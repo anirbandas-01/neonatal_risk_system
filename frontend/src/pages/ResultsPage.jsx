@@ -433,35 +433,39 @@ const ResultsPage = () => {
             Add Follow-up Assessment
           </button> */}
            <button 
-  onClick={() => {
-    const assessmentIdToUse = assessmentData._id || assessmentData.id;
-    
-    if (!assessmentIdToUse) {
-      alert('Assessment ID not found. Please try creating the assessment again.');
-      return;
-    }
-    
-    console.log('Navigating to prescription form with assessment ID:', assessmentIdToUse);
-    console.log('Full assessment data:', assessmentData);
-    
-    navigate(`/prescription/create/${assessmentIdToUse}`, {
-      state: { 
-        assessmentData: {
-          ...assessmentData,
-          _id: assessmentIdToUse,
-          babyInfo: assessmentData.babyInfo,
-          babyId: assessmentData.babyId,
-          // Make sure parentInfo is included
-          parentInfo: assessmentData.babyInfo?.parentInfo || assessmentData.parentInfo || {}
-        }
-      }
-    });
-  }}
-  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
->
-  <FileText className="w-6 h-6 mr-2" />
-  Create Prescription
-</button>
+              onClick={() => {
+                // Get the assessment ID from the response data structure
+                const assessmentIdToUse = assessmentData.latestAssessment?._id || 
+                                          assessmentData._id || 
+                                          assessmentData.id;
+                
+                if (!assessmentIdToUse) {
+                  alert('Assessment ID not found. Cannot create prescription.');
+                  console.error('Missing assessment ID in data:', assessmentData);
+                  return;
+                }
+                
+                console.log('✅ Navigating with Assessment ID:', assessmentIdToUse);
+                
+                navigate(`/prescription/create/${assessmentIdToUse}`, {
+                  state: { 
+                    assessmentData: {
+                      ...assessmentData,
+                      _id: assessmentIdToUse,
+                      babyInfo: assessmentData.babyInfo,
+                      babyId: assessmentData.babyId,
+                      parentInfo: assessmentData.parentInfo || assessmentData.babyInfo?.parentInfo || {},
+                      healthParameters: assessmentData.healthParameters,
+                      riskAssessment: assessmentData.riskAssessment
+                    }
+                  }
+                });
+              }}
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
+            >
+              <FileText className="w-6 h-6 mr-2" />
+              Create Prescription
+          </button>
 
 
           <button 
