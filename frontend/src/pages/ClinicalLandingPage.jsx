@@ -1,64 +1,79 @@
-import React, { useState, useEffect } from 'react';
+// frontend/src/pages/ClinicalLandingPage.jsx - FINAL VERSION
+import React, { useState } from 'react';
 import { Heart, Shield, Clock, TrendingUp, Users, Award, CheckCircle, ArrowRight, Activity, Brain, Database, Lock, History, Stethoscope, FileCheck, AlertCircle, Mail, Linkedin, Github, User, LogIn, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDoctorAuth } from '../context/DoctorAuthContext';
 
 export default function ClinicalLandingPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const navigate = useNavigate();
+  
+  // ✅ USE REAL AUTH CONTEXT
+  const { doctor, login, register, logout, isAuthenticated } = useDoctorAuth();
+  
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+  const [authMode, setAuthMode] = useState('login');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    hospitalName: '',
-    licenseNumber: ''
+    registration_no: '',
+    clinic_name: '',
+    phone: '',
+    address: ''
   });
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
 
-  // Check if user is logged in on mount
-  useEffect(() => {
-    const authStatus = localStorage.getItem('doctorAuth');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleAuth = (e) => {
+  // ✅ REAL AUTH HANDLER
+  const handleAuth = async (e) => {
     e.preventDefault();
-    // Simulate authentication (in production, this would call your backend)
-    localStorage.setItem('doctorAuth', 'true');
-    localStorage.setItem('doctorName', formData.name || 'Dr. ' + formData.email.split('@')[0]);
-    setIsAuthenticated(true);
-    setShowAuthModal(false);
-    setFormData({ name: '', email: '', password: '', hospitalName: '', licenseNumber: '' });
+    setAuthError('');
+    setAuthLoading(true);
+
+    let result;
+    
+    if (authMode === 'login') {
+      result = await login(formData.email, formData.password);
+    } else {
+      result = await register(formData);
+    }
+
+    setAuthLoading(false);
+
+    if (result.success) {
+      setShowAuthModal(false);
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        registration_no: '',
+        clinic_name: '',
+        phone: '',
+        address: ''
+      });
+    } else {
+      setAuthError(result.message);
+    }
   };
 
+  // ✅ REAL LOGOUT
   const handleLogout = () => {
-    localStorage.removeItem('doctorAuth');
-    localStorage.removeItem('doctorName');
-    setIsAuthenticated(false);
+    logout();
   };
 
-/*   const handleStartAssessment = () => {
-    if (isAuthenticated) {
-      // Navigate to assessment page
-      window.location.href = '/assessment';
+  // ✅ CHECK AUTH BEFORE NAVIGATION
+  const handleStartAssessment = () => {
+    if (isAuthenticated()) {
+      navigate('/HomePage');
     } else {
       setShowAuthModal(true);
       setAuthMode('login');
     }
-  }; */
+  };
 
-  const handleStartAssessment = () => {
-     navigate('/HomePage');
-   };
-
-   
   const scrollToSection = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const navigate = useNavigate();
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -78,11 +93,11 @@ export default function ClinicalLandingPage() {
             </div>
             
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
+              {isAuthenticated() ? (
                 <div className="flex items-center space-x-3">
                   <div className="hidden sm:block text-right">
                     <p className="text-sm font-semibold text-gray-900">
-                      {localStorage.getItem('doctorName')}
+                      {doctor.name}
                     </p>
                     <p className="text-xs text-green-600 flex items-center justify-end">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
@@ -143,7 +158,7 @@ export default function ClinicalLandingPage() {
                 className="px-8 py-4 bg-white hover:bg-gray-50 text-blue-700 rounded-xl font-bold text-lg shadow-2xl transition-all transform hover:scale-105 flex items-center"
               >
                 <Activity className="w-6 h-6 mr-3" />
-                Start Clinical Assessment
+                {isAuthenticated() ? 'Go to Dashboard' : 'Login to Start'}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </button>
               <button
@@ -479,7 +494,7 @@ export default function ClinicalLandingPage() {
         </div>
       </footer>
 
-      {/* Authentication Modal */}
+      {/* ✅ REAL AUTHENTICATION MODAL */}
       {showAuthModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -495,6 +510,13 @@ export default function ClinicalLandingPage() {
             </div>
             
             <form onSubmit={handleAuth} className="p-6">
+              {/* ✅ SHOW ERROR MESSAGES */}
+              {authError && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  {authError}
+                </div>
+              )}
+
               {authMode === 'signup' && (
                 <>
                   <div className="mb-4">
@@ -518,8 +540,8 @@ export default function ClinicalLandingPage() {
                     <input
                       type="text"
                       required
-                      value={formData.hospitalName}
-                      onChange={(e) => setFormData({...formData, hospitalName: e.target.value})}
+                      value={formData.clinic_name}
+                      onChange={(e) => setFormData({...formData, clinic_name: e.target.value})}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                       placeholder="City Medical Center"
                     />
@@ -532,10 +554,37 @@ export default function ClinicalLandingPage() {
                     <input
                       type="text"
                       required
-                      value={formData.licenseNumber}
-                      onChange={(e) => setFormData({...formData, licenseNumber: e.target.value})}
+                      value={formData.registration_no}
+                      onChange={(e) => setFormData({...formData, registration_no: e.target.value})}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                       placeholder="MED-123456"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                      placeholder="+1-555-0123"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Address (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.address}
+                      onChange={(e) => setFormData({...formData, address: e.target.value})}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                      placeholder="123 Medical Plaza"
                     />
                   </div>
                 </>
@@ -566,20 +615,38 @@ export default function ClinicalLandingPage() {
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                   placeholder="••••••••"
+                  minLength={6}
                 />
+                {authMode === 'signup' && (
+                  <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                )}
               </div>
               
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg font-bold text-lg transition-all shadow-lg"
+                disabled={authLoading}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg font-bold text-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authMode === 'login' ? 'Login to Dashboard' : 'Register Account'}
+                {authLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  authMode === 'login' ? 'Login to Dashboard' : 'Register Account'
+                )}
               </button>
               
               <div className="mt-4 text-center">
                 <button
                   type="button"
-                  onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                  onClick={() => {
+                    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                    setAuthError('');
+                  }}
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
                   {authMode === 'login' 
@@ -591,7 +658,10 @@ export default function ClinicalLandingPage() {
               <div className="mt-4 text-center">
                 <button
                   type="button"
-                  onClick={() => setShowAuthModal(false)}
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAuthError('');
+                  }}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   Cancel

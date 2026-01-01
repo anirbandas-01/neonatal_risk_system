@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const assessmentRoutes = require('./routes/assessment');
 const prescriptionRoutes = require('./routes/prescription');
+const doctorRoutes = require('./routes/doctor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Mount routes BEFORE 404 handler
+app.use('/api/doctor', doctorRoutes);
 app.use('/api/prescription', prescriptionRoutes);
 app.use('/api', assessmentRoutes);
 
@@ -37,6 +39,9 @@ app.get('/', (req, res) => {
         version: '1.0.0',
         endpoints: {
             health: '/health',
+            doctorRegister: 'POST /api/doctor/register',
+            doctorLogin: 'POST /api/doctor/login',
+            doctorProfile: 'GET /api/doctor/profile',
             createAssessment: 'POST /api/assess',
             getAssessment: 'GET /api/assess/:babyId',
             getAllAssessments: 'GET /api/assessments',
@@ -87,6 +92,9 @@ app.listen(PORT, () => {
     console.log(`🏥 Health: http://localhost:${PORT}/health`);
     console.log('=================================');
     console.log('📋 Available routes:');
+    console.log('   POST   /api/doctor/register');
+    console.log('   POST   /api/doctor/login');
+    console.log('   GET    /api/doctor/profile');
     console.log('   POST   /api/prescription/create');
     console.log('   GET    /api/prescription/:id');
     console.log('   GET    /api/prescription/:id/download');
