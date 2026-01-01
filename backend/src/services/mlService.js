@@ -18,7 +18,7 @@ class MLServices {
                 `${ML_MODEL_URL}/predict`,
                 mlPayload,
                 {
-                    timeout: 10000,
+                    timeout: 60000,
                     headers: { 'Content-Type': 'application/json' }
                 }
             );
