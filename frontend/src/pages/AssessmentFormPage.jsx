@@ -4,9 +4,10 @@ import { ArrowLeft, Save, AlertCircle, CheckCircle, Search, Plus, Baby, Sparkles
 import BabyInfoForm from '../components/BabyInfoForm';
 import InputField from '../components/InputField';
 import SelectField from '../components/SelectField';
-// REMOVE validation imports
 import { generateBabyId, formatDate } from '../utils/helpers';
 import { assessmentAPI, babyAPI } from '../services/api';
+import { validateIndianPhone } from '../utils/phoneValidation';
+
 
 function AssessmentFormPage() {
   const navigate = useNavigate();
@@ -154,7 +155,14 @@ function AssessmentFormPage() {
       if (!babyInfo.gender) babyErrors.gender = 'Gender is required';
       
       if (!parentInfo.motherName.trim()) parentErrors.motherName = "Mother's name is required";
-      if (!parentInfo.contactNumber.trim()) parentErrors.contactNumber = 'Contact number is required';
+      if (!parentInfo.contactNumber.trim()) {
+           parentErrors.contactNumber = 'Contact number is required';
+        } else {
+        const phoneValidation = validateIndianPhone(parentInfo.contactNumber);
+        if (!phoneValidation.isValid) {
+        parentErrors.contactNumber = phoneValidation.message;
+      }
+    }
     }
     
     return { babyErrors, parentErrors };
@@ -216,6 +224,15 @@ function AssessmentFormPage() {
     setIsSubmitting(true);
     
     try {
+
+       let formattedParentInfo = { ...parentInfo };
+        if (babyType === 'new' && parentInfo.contactNumber) {
+          const validation = validateIndianPhone(parentInfo.contactNumber);
+          if (validation.formatted) {
+            formattedParentInfo.contactNumber = validation.formatted;
+          }
+        }
+
       const assessmentData = {
         isNewBaby: babyType === 'new',
         babyId: babyId,
@@ -247,7 +264,7 @@ function AssessmentFormPage() {
       
       if (babyType === 'new') {
         assessmentData.babyInfo = babyInfo;
-        assessmentData.parentInfo = parentInfo;
+        assessmentData.parentInfo = formattedParentInfo;
       }
       
       console.log('Submitting assessment:', assessmentData);

@@ -24,7 +24,8 @@ export default function PrescriptionFormPage() {
       registration_no: doctor.registration_no,
       clinic_name: doctor.clinic_name,
       phone: doctor.phone,
-      address: doctor.address || 'Not provided'
+      address: doctor.address || 'Not provided',
+      email: doctor.email
     } : null;
 
 
@@ -194,9 +195,9 @@ useEffect(() => {
     try {
     
       console.log('🔍 Prescription Debug Info:');
-console.log('assessmentData:', assessmentData);
-console.log('parentInfo:', assessmentData.parentInfo);
-console.log('Parent phone:', assessmentData.parentInfo?.contactNumber);
+      console.log('assessmentData:', assessmentData);
+      console.log('parentInfo:', assessmentData.parentInfo);
+      console.log('Parent phone:', assessmentData.parentInfo?.contactNumber);
 
       const prescriptionData = {
       doctor_id: doctor._id,  
@@ -327,6 +328,12 @@ console.log('Parent phone:', assessmentData.parentInfo?.contactNumber);
               <p className="text-gray-600">Phone</p>
               <p className="font-semibold">{doctorInfo.phone}</p>
             </div>
+            {doctorInfo.email && (
+            <div className="col-span-2">
+              <p className="text-gray-600">Email</p>
+              <p className="font-semibold">{doctorInfo.email}</p>
+            </div>
+               )}
             {doctorInfo.address && doctorInfo.address !== 'Not provided' && (
               <div className="col-span-2">
                 <p className="text-gray-600">Address</p>

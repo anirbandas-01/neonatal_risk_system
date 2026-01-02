@@ -211,7 +211,13 @@ const babySchema = new mongoose.Schema({
         contactNumber: {
             type: String,
             required: true,
-            trim: true
+            trim: true,
+            validate: {
+                    validator: function(v) {
+                      return /^\+91\d{10}$/.test(v);
+                    },
+                    message: 'Contact number must be in format +91XXXXXXXXXX (10 digits after +91)'
+                }
         },
         email: {
             type: String,

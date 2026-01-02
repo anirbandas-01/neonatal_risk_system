@@ -20,6 +20,10 @@ function generatePrescriptionPDF(prescription) {
      .text(`Registration No: ${prescription.doctor.registration_no}`, { align: 'center' })
      .text(`${prescription.doctor.phone}`, { align: 'center' });
 
+   if (prescription.doctor.email) {
+    doc.text(`${prescription.doctor.email}`, { align: 'center' });
+     }
+
   if (prescription.doctor.address) {
     doc.text(prescription.doctor.address, { align: 'center' });
   }
@@ -49,6 +53,7 @@ function generatePrescriptionPDF(prescription) {
      .text(`Age: ${prescription.patient.age_days} days`)
      .text(`Gender: ${prescription.patient.gender}`)
      .text(`Parent Contact: ${prescription.patient.parent_phone}`)
+     .text(`Parent Email: ${prescription.patient.parent_email || 'Not provided'}`)
      .moveDown(1);
 
   // Diagnosis

@@ -1,13 +1,12 @@
-// frontend/src/pages/ClinicalLandingPage.jsx - FINAL VERSION
 import React, { useState } from 'react';
 import { Heart, Shield, Clock, TrendingUp, Users, Award, CheckCircle, ArrowRight, Activity, Brain, Database, Lock, History, Stethoscope, FileCheck, AlertCircle, Mail, Linkedin, Github, User, LogIn, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
+import { validateIndianPhone } from '../utils/phoneValidation'; 
 
 export default function ClinicalLandingPage() {
   const navigate = useNavigate();
   
-  // ✅ USE REAL AUTH CONTEXT
   const { doctor, login, register, logout, isAuthenticated } = useDoctorAuth();
   
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -24,44 +23,71 @@ export default function ClinicalLandingPage() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
-  // ✅ REAL AUTH HANDLER
   const handleAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
-    setAuthLoading(true);
 
-    let result;
-    
-    if (authMode === 'login') {
-      result = await login(formData.email, formData.password);
-    } else {
-      result = await register(formData);
-    }
-
-    setAuthLoading(false);
-
-    if (result.success) {
-      setShowAuthModal(false);
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        registration_no: '',
-        clinic_name: '',
-        phone: '',
-        address: ''
+    // Handle signup with phone auto-formatting
+    if (authMode === 'signup') {
+      const phoneValidation = validateIndianPhone(formData.phone);
+      if (!phoneValidation.isValid) {
+        setAuthError(phoneValidation.message);
+        return;
+      }
+      
+      // Auto-format phone number before sending to backend
+      const formattedPhone = phoneValidation.formatted || formData.phone;
+      
+      setAuthLoading(true);
+      
+      const result = await register({
+        ...formData,
+        phone: formattedPhone  // Send formatted phone
       });
+      
+      setAuthLoading(false);
+
+      if (result.success) {
+        setShowAuthModal(false);
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          registration_no: '',
+          clinic_name: '',
+          phone: '',
+          address: ''
+        });
+      } else {
+        setAuthError(result.message);
+      }
     } else {
-      setAuthError(result.message);
+      // Login logic
+      setAuthLoading(true);
+      const result = await login(formData.email, formData.password);
+      setAuthLoading(false);
+
+      if (result.success) {
+        setShowAuthModal(false);
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          registration_no: '',
+          clinic_name: '',
+          phone: '',
+          address: ''
+        });
+      } else {
+        setAuthError(result.message);
+      }
     }
   };
 
-  // ✅ REAL LOGOUT
   const handleLogout = () => {
     logout();
   };
 
-  // ✅ CHECK AUTH BEFORE NAVIGATION
   const handleStartAssessment = () => {
     if (isAuthenticated()) {
       navigate('/HomePage');
@@ -494,7 +520,7 @@ export default function ClinicalLandingPage() {
         </div>
       </footer>
 
-      {/* ✅ REAL AUTHENTICATION MODAL */}
+      {/* Authentication Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -510,7 +536,6 @@ export default function ClinicalLandingPage() {
             </div>
             
             <form onSubmit={handleAuth} className="p-6">
-              {/* ✅ SHOW ERROR MESSAGES */}
               {authError && (
                 <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                   {authError}
@@ -570,9 +595,19 @@ export default function ClinicalLandingPage() {
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onBlur={(e) => {
+                        // Auto-format phone number on blur
+                        const validation = validateIndianPhone(e.target.value);
+                        if (validation.isValid && validation.formatted) {
+                          setFormData({...formData, phone: validation.formatted});
+                        }
+                      }}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                      placeholder="+1-555-0123"
+                      placeholder="+91XXXXXXXXXX"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Enter 10 digits (e.g., 8101733466) or full format (+918101733466)
+                    </p>
                   </div>
 
                   <div className="mb-4">

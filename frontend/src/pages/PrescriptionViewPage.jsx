@@ -159,7 +159,15 @@ function PrescriptionViewPage() {
             <p className="text-sm text-gray-600">
               Registration No: {prescription.doctor.registration_no}
             </p>
-            <p className="text-sm text-gray-600">{prescription.doctor.phone}</p>
+            {/* ✅ ADD THESE LINES */}
+            <p className="text-sm text-gray-600">
+              📞 Phone: {prescription.doctor.phone}
+            </p>
+            {prescription.doctor.email && (
+              <p className="text-sm text-gray-600">
+                ✉️ Email: {prescription.doctor.email}
+              </p>
+            )}
             {prescription.doctor.address && (
               <p className="text-sm text-gray-600">{prescription.doctor.address}</p>
             )}
@@ -190,9 +198,15 @@ function PrescriptionViewPage() {
               <div>
                 <span className="font-semibold">Gender:</span> {prescription.patient.gender}
               </div>
+              
               <div className="col-span-2">
-                <span className="font-semibold">Parent Contact:</span> {prescription.patient.parent_phone}
+                <span className="font-semibold">📞 Parent Contact:</span> {prescription.patient.parent_phone}
               </div>
+              {prescription.patient.parent_email && prescription.patient.parent_email !== '' && (
+                <div className="col-span-2">
+                  <span className="font-semibold">✉️ Parent Email:</span> {prescription.patient.parent_email}
+                </div>
+              )}
             </div>
           </div>
 

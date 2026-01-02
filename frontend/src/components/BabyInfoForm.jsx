@@ -1,10 +1,31 @@
 import InputField from './InputField';
 import SelectField from './SelectField';
+import { validateIndianPhone, formatIndianPhone } from '../utils/phoneValidation';
+import { useState } from 'react'; 
+
 
 function BabyInfoForm({ babyInfo, parentInfo, onChange, errors, disabled = false }) {
+  const [phoneError, setPhoneError] = useState('');
   
   const handleChange = (e, section) => {
     const { name, value } = e.target;
+
+
+     if (name === 'contactNumber' && section === 'parentInfo') {
+      const validation = validateIndianPhone(value);
+      
+      if (value && !validation.isValid) {
+        setPhoneError(validation.message);
+      } else {
+        setPhoneError('');
+        // Auto-format if valid
+        if (validation.formatted) {
+          onChange(section, name, validation.formatted);
+          return;
+        }
+      }
+    }
+
     onChange(section, name, value);
   };
 
@@ -106,15 +127,26 @@ function BabyInfoForm({ babyInfo, parentInfo, onChange, errors, disabled = false
           />
           
           <InputField
-            label="Contact Number"
-            name="contactNumber"
-            type="tel"
-            value={parentInfo.contactNumber}
-            onChange={(e) => handleChange(e, 'parentInfo')}
-            error={errors?.parentInfo?.contactNumber}
-            placeholder="+1234567890"
-            disabled={disabled}
-          />
+                label="Contact Number"
+                name="contactNumber"
+                type="tel"
+                value={parentInfo.contactNumber}
+                onChange={(e) => handleChange(e, 'parentInfo')}
+                onBlur={(e) => {
+                  // ✅ AUTO-FORMAT ON BLUR
+                  const validation = validateIndianPhone(e.target.value);
+                  if (validation.isValid && validation.formatted) {
+                    onChange('parentInfo', 'contactNumber', validation.formatted);
+                  }
+                }}
+                error={phoneError || errors?.parentInfo?.contactNumber}
+                placeholder="+91XXXXXXXXXX"
+                disabled={disabled}
+              />
+              {/* ✅ ADD HELPER TEXT */}
+              <p className="text-xs text-gray-500 mt-1 ml-1">
+                Enter 10 digits or full format with +91
+              </p>
           
           <InputField
             label="Email"

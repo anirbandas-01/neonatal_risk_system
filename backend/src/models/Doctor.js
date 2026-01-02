@@ -34,7 +34,13 @@ const doctorSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    validate: {
+      validator: function(v) {
+        return /^\+91\d{10}$/.test(v);
+      },
+    message: 'Phone number must be in format +91XXXXXXXXXX (10 digits after +91)'
+  }
   },
   address: {
     type: String,

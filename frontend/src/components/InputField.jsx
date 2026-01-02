@@ -3,7 +3,8 @@ function InputField({
   name, 
   type = "number", 
   value, 
-  onChange, 
+  onChange,
+  onBlur, 
   error, 
   placeholder,
   unit,
@@ -32,6 +33,7 @@ function InputField({
           name={name}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           min={min}
           max={max}
