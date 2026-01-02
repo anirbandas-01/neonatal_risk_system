@@ -11,6 +11,17 @@ const api = axios.create({
 });
 
 
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('doctorToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
 
 // Global error handling
 api.interceptors.response.use(

@@ -170,7 +170,12 @@ const babySchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-
+    doctorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Doctor',
+        required: true,
+       // index: true  
+    },
     babyInfo: {
         name: {
             type: String,

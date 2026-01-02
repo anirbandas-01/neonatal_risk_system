@@ -1,14 +1,11 @@
 const Baby = require('../models/Baby');
 
-/**
- * CHECK IF BABY EXISTS
- * GET /api/baby/:babyId/exists
- */
 exports.checkBabyExists = async (req, res) => {
   try {
     const { babyId } = req.params;
-
-    const baby = await Baby.findOne({ babyId })
+    const doctorId = req.doctor.id; 
+    
+    const baby = await Baby.findOne({ babyId , doctorId})
       .select('babyId babyInfo parentInfo totalVisits lastVisitDate currentRiskLevel');
 
     if (!baby) {
@@ -35,10 +32,7 @@ exports.checkBabyExists = async (req, res) => {
   }
 };
 
-/**
- * GET BABY HISTORY
- * GET /api/baby/:babyId/history
- */
+
 exports.getBabyHistory = async (req, res) => {
   try {
     const { babyId } = req.params;
@@ -70,15 +64,13 @@ exports.getBabyHistory = async (req, res) => {
   }
 };
 
-/**
- * GET ALL BABIES
- * GET /api/babies
- */
+
 exports.getAllBabies = async (req, res) => {
   try {
     const { riskLevel, search, limit = 100, skip = 0 } = req.query;
+    const doctorId = req.doctor.id;
 
-    const query = {};
+    const query = {doctorId};
 
     if (riskLevel && riskLevel !== 'All') {
       query.currentRiskLevel = riskLevel;
@@ -120,15 +112,13 @@ exports.getAllBabies = async (req, res) => {
   }
 };
 
-/**
- * DELETE BABY
- * DELETE /api/baby/:babyId
- */
+
 exports.deleteBaby = async (req, res) => {
   try {
     const { babyId } = req.params;
+    const doctorId = req.doctor.id;
 
-    const baby = await Baby.findOneAndDelete({ babyId });
+    const baby = await Baby.findOneAndDelete({ babyId, doctorId});
 
     if (!baby) {
       return res.status(404).json({

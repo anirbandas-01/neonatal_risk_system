@@ -18,6 +18,8 @@ exports.createOrUpdateAssessment = async (req, res) => {
       doctorNotes
     } = req.body;
 
+    const doctorId = req.doctor.id;
+    
     if (!babyId || !healthParameters) {
       return res.status(400).json({
         success: false,
@@ -25,10 +27,10 @@ exports.createOrUpdateAssessment = async (req, res) => {
       });
     }
 
-    console.log('Processing assessment for:', babyId);
+    console.log('Processing assessment for:', babyId, 'by doctor:', doctorId);
 
 
-    let baby = await Baby.findOne({ babyId });
+    let baby = await Baby.findOne({ babyId , doctorId});
 
     
     if (!baby) {
@@ -41,6 +43,7 @@ exports.createOrUpdateAssessment = async (req, res) => {
 
       baby = new Baby({
         babyId,
+        doctorId,
         babyInfo,
         parentInfo,
         assessments: []
@@ -159,8 +162,9 @@ specificRisks: specificRisks
 exports.getBabyHistory = async (req, res) => {
   try {
     const { babyId } = req.params;
+    const doctorId = req.doctor.id;
 
-    const baby = await Baby.findOne({ babyId });
+    const baby = await Baby.findOne({ babyId , doctorId});
     if (!baby) {
       return res.status(404).json({ success: false, message: 'Baby not found' });
     }

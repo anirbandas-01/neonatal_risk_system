@@ -3,10 +3,13 @@ const Baby = require('../models/Baby');
 exports.getStatistics = async (req, res) => {
   // your existing statistics logic
   try {
-    const totalBabies = await Baby.countDocuments();
-    const lowRisk = await Baby.countDocuments({ currentRiskLevel: 'Low Risk' });
-    const mediumRisk = await Baby.countDocuments({ currentRiskLevel: 'Medium Risk' });
-    const highRisk = await Baby.countDocuments({ currentRiskLevel: 'High Risk' });
+
+    const doctorId = req.doctor.id;
+
+    const totalBabies = await Baby.countDocuments({ doctorId });
+    const lowRisk = await Baby.countDocuments({doctorId, currentRiskLevel: 'Low Risk' });
+    const mediumRisk = await Baby.countDocuments({ doctorId, currentRiskLevel: 'Medium Risk' });
+    const highRisk = await Baby.countDocuments({doctorId, currentRiskLevel: 'High Risk' });
     
     // Total assessments across all babies
     const allBabies = await Baby.find();
