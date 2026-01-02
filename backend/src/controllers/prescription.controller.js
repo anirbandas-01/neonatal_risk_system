@@ -8,6 +8,7 @@ const Baby = require('../models/Baby');
 exports.createPrescription = async (req, res) => {
   try {
     const {
+      doctor_id,
       doctor,
       patient,
       assessment_id,
@@ -44,6 +45,7 @@ exports.createPrescription = async (req, res) => {
 
     // Create prescription
     const prescription = new Prescription({
+      doctor_id,
       doctor,
       patient,
       assessment_id,

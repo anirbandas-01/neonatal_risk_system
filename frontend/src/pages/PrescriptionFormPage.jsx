@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Save, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { useDoctorAuth } from '../context/DoctorAuthContext';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
@@ -10,20 +11,41 @@ export default function PrescriptionFormPage() {
   const location = useLocation();
   const { assessmentId } = useParams();
   
+  const { doctor } = useDoctorAuth();
+
   const assessmentData = location.state?.assessmentData;
   
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   
-  // Doctor Information (in real app, get from auth)
-  const [doctorInfo, setDoctorInfo] = useState({
-    name: localStorage.getItem('doctorName') || 'Dr. Smith',
-    registration_no: 'MED-12345',
-    clinic_name: 'City Children Hospital',
-    phone: '+1-555-0123',
-    address: '123 Medical Plaza, Healthcare City'
-  });
+  const doctorInfo = doctor ? {
+      name: doctor.name,
+      registration_no: doctor.registration_no,
+      clinic_name: doctor.clinic_name,
+      phone: doctor.phone,
+      address: doctor.address || 'Not provided'
+    } : null;
+
+
+    if (!doctor || !doctorInfo) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">Please login to create prescriptions.</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
 
   // Diagnosis Summary
   const [diagnosisSummary, setDiagnosisSummary] = useState('');
@@ -142,57 +164,6 @@ useEffect(() => {
     return true;
   };
 
-/*   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    if (!assessmentData) {
-      setError('Assessment data not found');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const prescriptionData = {
-        doctor: doctorInfo,
-        patient: {
-          baby_id: assessmentData.babyId,
-          name: assessmentData.babyInfo.name,
-          age_days: assessmentData.healthParameters.ageDays,
-          gender: assessmentData.babyInfo.gender,
-          parent_phone: assessmentData.babyInfo.parentInfo?.contactNumber || 'N/A',
-          parent_email: assessmentData.babyInfo.parentInfo?.email || ''
-        },
-        assessment_id: assessmentId,
-        diagnosis_summary: diagnosisSummary,
-        medicines: medicines,
-        advice: advice
-      };
-
-      const response = await axios.post(`${API_BASE_URL}/prescription/create`, prescriptionData);
-
-      if (response.data.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate(`/prescription/${response.data.data._id}/view`, {
-            state: { prescription: response.data.data }
-          });
-        }, 1500);
-      }
-
-    } catch (err) {
-      console.error('Prescription creation error:', err);
-      setError(err.response?.data?.message || 'Failed to create prescription');
-    } finally {
-      setLoading(false);
-    }
-  }; */
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -222,6 +193,7 @@ useEffect(() => {
 
     try {
       const prescriptionData = {
+      doctor_id: doctor._id,  
       doctor: doctorInfo,
       patient: {
         baby_id: assessmentData.babyId,
@@ -229,9 +201,9 @@ useEffect(() => {
         age_days: assessmentData.healthParameters.ageDays,
         gender: assessmentData.babyInfo.gender,
         parent_phone: assessmentData.parentInfo?.contactNumber || 'N/A',
-        parent_email: assessmentData.parentInfo?.email || ''
+        parent_email: assessmentData.parentInfo?.email || 'N/A'
       },
-      assessment_id: actualAssessmentId,  // ✅ Correct ID here
+      assessment_id: actualAssessmentId,  
       diagnosis_summary: diagnosisSummary,
       medicines: medicines,
       advice: advice
@@ -327,26 +299,32 @@ useEffect(() => {
           
           {/* Doctor Information (Read-only) */}
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Doctor Information</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-600">Name</p>
-                <p className="font-semibold">{doctorInfo.name}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Registration No</p>
-                <p className="font-semibold">{doctorInfo.registration_no}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Clinic/Hospital</p>
-                <p className="font-semibold">{doctorInfo.clinic_name}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Phone</p>
-                <p className="font-semibold">{doctorInfo.phone}</p>
-              </div>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Doctor Information</h2>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Name</p>
+              <p className="font-semibold">{doctorInfo.name}</p>
             </div>
+            <div>
+              <p className="text-gray-600">Registration No</p>
+              <p className="font-semibold">{doctorInfo.registration_no}</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Clinic/Hospital</p>
+              <p className="font-semibold">{doctorInfo.clinic_name}</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Phone</p>
+              <p className="font-semibold">{doctorInfo.phone}</p>
+            </div>
+            {doctorInfo.address && doctorInfo.address !== 'Not provided' && (
+              <div className="col-span-2">
+                <p className="text-gray-600">Address</p>
+                <p className="font-semibold">{doctorInfo.address}</p>
+              </div>
+            )}
           </div>
+        </div>
 
           {/* Diagnosis Summary */}
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
