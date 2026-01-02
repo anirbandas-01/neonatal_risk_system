@@ -45,6 +45,7 @@ function BabyHistoryPage() {
         assessmentData: {
           babyId: baby.babyId,
           babyInfo: baby.babyInfo,
+          parentInfo: baby.parentInfo, 
           assessmentDate: assessment.assessmentDate,
           healthParameters: assessment.healthParameters,
           riskAssessment: assessment.riskAssessment,

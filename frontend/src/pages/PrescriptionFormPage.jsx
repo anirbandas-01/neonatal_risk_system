@@ -192,6 +192,12 @@ useEffect(() => {
     setLoading(true);
 
     try {
+    
+      console.log('🔍 Prescription Debug Info:');
+console.log('assessmentData:', assessmentData);
+console.log('parentInfo:', assessmentData.parentInfo);
+console.log('Parent phone:', assessmentData.parentInfo?.contactNumber);
+
       const prescriptionData = {
       doctor_id: doctor._id,  
       doctor: doctorInfo,
@@ -200,8 +206,12 @@ useEffect(() => {
         name: assessmentData.babyInfo.name,
         age_days: assessmentData.healthParameters.ageDays,
         gender: assessmentData.babyInfo.gender,
-        parent_phone: assessmentData.parentInfo?.contactNumber || 'N/A',
-        parent_email: assessmentData.parentInfo?.email || 'N/A'
+        parent_phone: assessmentData.parentInfo?.contactNumber || 
+                  assessmentData.babyInfo?.parentInfo?.contactNumber || 
+                  'N/A',
+        parent_email: assessmentData.parentInfo?.email || 
+                  assessmentData.babyInfo?.parentInfo?.email || 
+                  'N/A'
       },
       assessment_id: actualAssessmentId,  
       diagnosis_summary: diagnosisSummary,

@@ -266,6 +266,7 @@ function AssessmentFormPage() {
             assessmentData: {
               babyId: response.data.babyId,
               babyInfo: response.data.babyInfo,
+              parentInfo: response.data.parentInfo,
               assessmentDate: response.data.latestAssessment.assessmentDate,
               healthParameters: response.data.latestAssessment.healthParameters,
               riskAssessment: response.data.latestAssessment.riskAssessment,

@@ -136,9 +136,10 @@ specificRisks: specificRisks
         babyInfo: baby.babyInfo,
         parentInfo: baby.parentInfo,
         totalVisits: baby.totalVisits,
-        latestAssessment,
-        
-        
+        latestAssessment: {
+             ...latestAssessment.toObject(),
+              parentInfo: baby.parentInfo
+        },    
         clinicalSummary: {
           flagsDetected: clinicalFlags.length,
           highSeverityFlags: clinicalFlags.filter(f => f.severity === 'high').length,
