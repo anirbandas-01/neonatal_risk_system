@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
     const { name, email, password, registration_no, clinic_name, phone, address } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password || !registration_no || !clinic_name || !phone) {
+    if (!name || !email || !password || !registration_no || !clinic_name || !phone || !address) {
       return res.status(400).json({
         success: false,
         message: 'All required fields must be provided'

@@ -44,7 +44,8 @@ const doctorSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    trim: true
+    trim: true,
+    required: [true, 'Clinic address is required']
   },
   specialization: {
     type: String,

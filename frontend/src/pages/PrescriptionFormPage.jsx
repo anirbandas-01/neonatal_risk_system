@@ -24,7 +24,7 @@ export default function PrescriptionFormPage() {
       registration_no: doctor.registration_no,
       clinic_name: doctor.clinic_name,
       phone: doctor.phone,
-      address: doctor.address || 'Not provided',
+      address: doctor.address,
       email: doctor.email
     } : null;
 

@@ -159,15 +159,18 @@ function PrescriptionViewPage() {
             <p className="text-sm text-gray-600">
               Registration No: {prescription.doctor.registration_no}
             </p>
-            {/* ✅ ADD THESE LINES */}
+            
             <p className="text-sm text-gray-600">
               📞 Phone: {prescription.doctor.phone}
             </p>
-            {prescription.doctor.email && (
+            {/* {prescription.doctor.email && (
               <p className="text-sm text-gray-600">
                 ✉️ Email: {prescription.doctor.email}
               </p>
-            )}
+            )} */}
+           <p className="text-sm text-gray-600">
+             ✉️ Email: {prescription.doctor.email || 'Not provided'}
+           </p>
             {prescription.doctor.address && (
               <p className="text-sm text-gray-600">{prescription.doctor.address}</p>
             )}

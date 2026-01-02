@@ -58,9 +58,16 @@ const prescriptionSchema = new mongoose.Schema({
       required: true,
       trim: true
     },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      default: '' 
+    },
     address: {
       type: String,
-      trim: true
+      trim: true,
+      default: ''
     }
   },
 

@@ -610,9 +610,9 @@ export default function ClinicalLandingPage() {
                     </p>
                   </div>
 
-                  <div className="mb-4">
+                  {/* <div className="mb-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Address (Optional)
+                       Clinic/Hospital Address * 
                     </label>
                     <input
                       type="text"
@@ -621,7 +621,22 @@ export default function ClinicalLandingPage() {
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                       placeholder="123 Medical Plaza"
                     />
-                  </div>
+                  </div> */}
+                  <div className="mb-4">
+  <label className="block text-sm font-semibold text-gray-700 mb-2">
+    Clinic/Hospital Address *
+  </label>
+  <textarea
+    type="text"
+    required
+    value={formData.address}
+    onChange={(e) => setFormData({...formData, address: e.target.value})}
+    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+    placeholder="123 Medical Plaza, City, State, Pincode"
+    rows="3"
+  />
+  <p className="text-xs text-gray-500 mt-1">Full clinic address including city and pincode</p>
+</div>
                 </>
               )}
               
