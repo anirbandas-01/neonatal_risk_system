@@ -14,5 +14,6 @@ router.post('/login', doctorController.login);
 // Protected routes (require authentication)
 router.get('/profile', authMiddleware, doctorController.getProfile);
 router.put('/profile', authMiddleware, doctorController.updateProfile);
+router.put('/change-password', authMiddleware, doctorController.changePassword);
 
 module.exports = router;

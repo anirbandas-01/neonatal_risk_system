@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, RefreshCw, AlertCircle, Plus, User, Calendar, TrendingUp, Eye } from 'lucide-react';
+import { ArrowLeft, Search, Filter, RefreshCw, AlertCircle, Plus, User, Calendar, Eye, Trash2 } from 'lucide-react';
 import { babyAPI, assessmentAPI } from '../services/api';
 import { getRiskColor, formatDate } from '../utils/helpers';
 
@@ -14,6 +14,8 @@ function DashboardPage() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('All');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -58,6 +60,33 @@ function DashboardPage() {
     }
 
     setFilteredBabies(filtered);
+  };
+
+  const handleDeleteBaby = async (baby) => {
+    if (deleteConfirm !== baby._id) {
+      setDeleteConfirm(baby._id);
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await babyAPI.deleteBaby(baby.babyId);
+      
+      // Update local state
+      setBabies(babies.filter(b => b._id !== baby._id));
+      setDeleteConfirm(null);
+      
+      // Show success message
+      alert(`Baby ${baby.babyInfo.name} deleted successfully`);
+      
+      // Refresh data
+      fetchData();
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete baby. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleRefresh = () => {
@@ -257,16 +286,38 @@ function DashboardPage() {
                     <div className="p-6">
                       {/* Baby Info */}
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">
-                          {baby.babyInfo.name}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-600 mb-1">
-                          <User className="w-4 h-4 mr-2" />
-                          <span className="font-mono">{baby.babyId}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          <span>DOB: {new Date(baby.babyInfo.dateOfBirth).toLocaleDateString()}</span>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">
+                              {baby.babyInfo.name}
+                            </h3>
+                            <div className="flex items-center text-sm text-gray-600 mb-1">
+                              <User className="w-4 h-4 mr-2" />
+                              <span className="font-mono">{baby.babyId}</span>
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              <span>DOB: {new Date(baby.babyInfo.dateOfBirth).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => handleDeleteBaby(baby)}
+                            disabled={deleting && deleteConfirm === baby._id}
+                            className={`p-2 rounded-lg transition-colors ${
+                              deleteConfirm === baby._id
+                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                : 'bg-gray-100 text-red-500 hover:bg-red-100'
+                            }`}
+                            title={deleteConfirm === baby._id ? 'Click again to confirm' : 'Delete baby'}
+                          >
+                            {deleting && deleteConfirm === baby._id ? (
+                              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                            ) : (
+                              <Trash2 className="w-5 h-5" />
+                            )}
+                          </button>
                         </div>
                       </div>
 
@@ -329,6 +380,15 @@ function DashboardPage() {
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
+                      
+                      {/* Delete Confirmation Message */}
+                      {deleteConfirm === baby._id && (
+                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-center">
+                          <p className="text-sm text-red-700 font-semibold">
+                            Click delete again to confirm
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

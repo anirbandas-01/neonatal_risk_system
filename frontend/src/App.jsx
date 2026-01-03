@@ -1,7 +1,8 @@
-// frontend/src/App.jsx - FINAL VERSION WITH AUTH
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// frontend/src/App.jsx - FINAL VERSION WITH AUTH & NAVBAR
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DoctorAuthProvider, useDoctorAuth } from './context/DoctorAuthContext';
 
+// Page imports
 import HomePage from './pages/HomePage';
 import AssessmentFormPage from './pages/AssessmentFormPage';
 import DashboardPage from './pages/DashboardPage';
@@ -11,6 +12,8 @@ import BabyHistoryPage from './pages/BabyHistoryPage';
 import ClinicalLandingPage from './pages/ClinicalLandingPage';
 import PrescriptionFormPage from './pages/PrescriptionFormPage';
 import PrescriptionViewPage from './pages/PrescriptionViewPage';
+import ProfilePage from './pages/ProfilePage'; // Make sure this import exists
+import DoctorNavbar from './components/DoctorNavbar';
 
 // ✅ PROTECTED ROUTE COMPONENT
 const ProtectedRoute = ({ children }) => {
@@ -32,59 +35,77 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated() ? children : <Navigate to="/" replace />;
 };
 
-// ✅ APP ROUTES COMPONENT (inside auth provider)
-function AppRoutes() {
+// ✅ MAIN APP ROUTES WITH NAVBAR LOGIC
+function AppContent() {
+  const location = useLocation();
+  const { isAuthenticated } = useDoctorAuth();
+  
+  // Don't show navbar on landing page and test page
+  const shouldShowNavbar = isAuthenticated() && 
+    location.pathname !== '/' && 
+    location.pathname !== '/test';
+  
   return (
-    <Routes>
-      {/* Public Route - Landing Page */}
-      <Route path="/" element={<ClinicalLandingPage />} />
-      
-      {/* Test page (public for development) */}
-      <Route path="/test" element={<TestPage />} />
-      
-      {/* ✅ PROTECTED ROUTES - Require Authentication */}
-      <Route path="/HomePage" element={
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/assessment" element={
-        <ProtectedRoute>
-          <AssessmentFormPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <DashboardPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/results" element={
-        <ProtectedRoute>
-          <ResultsPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/baby/:babyId/history" element={
-        <ProtectedRoute>
-          <BabyHistoryPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/prescription/create/:assessmentId" element={
-        <ProtectedRoute>
-          <PrescriptionFormPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/prescription/:prescriptionId/view" element={
-        <ProtectedRoute>
-          <PrescriptionViewPage />
-        </ProtectedRoute>
-      } />
-    </Routes>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      {shouldShowNavbar && <DoctorNavbar />}
+      <Routes>
+        {/* Public Routes - No Authentication Required */}
+        <Route path="/" element={<ClinicalLandingPage />} />
+        <Route path="/test" element={<TestPage />} />
+        
+        {/* ✅ PROTECTED ROUTES - Require Authentication */}
+        <Route path="/HomePage" element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/assessment" element={
+          <ProtectedRoute>
+            <AssessmentFormPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/results" element={
+          <ProtectedRoute>
+            <ResultsPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/baby/:babyId/history" element={
+          <ProtectedRoute>
+            <BabyHistoryPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/prescription/create/:assessmentId" element={
+          <ProtectedRoute>
+            <PrescriptionFormPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/prescription/:prescriptionId/view" element={
+          <ProtectedRoute>
+            <PrescriptionViewPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Catch-all redirect to home */}
+        <Route path="*" element={<Navigate to={isAuthenticated() ? "/HomePage" : "/"} replace />} />
+      </Routes>
+    </div>
   );
 }
 
@@ -93,7 +114,7 @@ function App() {
   return (
     <DoctorAuthProvider>
       <Router>
-        <AppRoutes />
+        <AppContent />
       </Router>
     </DoctorAuthProvider>
   );
