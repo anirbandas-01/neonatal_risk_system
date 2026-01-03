@@ -1,4 +1,5 @@
-// frontend/src/App.jsx - FINAL VERSION WITH AUTH & NAVBAR
+// App.jsx - UPDATED VERSION
+
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DoctorAuthProvider, useDoctorAuth } from './context/DoctorAuthContext';
 
@@ -12,14 +13,13 @@ import BabyHistoryPage from './pages/BabyHistoryPage';
 import ClinicalLandingPage from './pages/ClinicalLandingPage';
 import PrescriptionFormPage from './pages/PrescriptionFormPage';
 import PrescriptionViewPage from './pages/PrescriptionViewPage';
-import ProfilePage from './pages/ProfilePage'; // Make sure this import exists
+import ProfilePage from './pages/ProfilePage';
 import DoctorNavbar from './components/DoctorNavbar';
 
 // ✅ PROTECTED ROUTE COMPONENT
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useDoctorAuth();
   
-  // Show loading spinner while checking auth status
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
@@ -31,29 +31,29 @@ const ProtectedRoute = ({ children }) => {
     );
   }
   
-  // Redirect to landing page if not authenticated
   return isAuthenticated() ? children : <Navigate to="/" replace />;
 };
 
-// ✅ MAIN APP ROUTES WITH NAVBAR LOGIC
+// ✅ MAIN APP ROUTES WITH CONDITIONAL NAVBAR
 function AppContent() {
   const location = useLocation();
   const { isAuthenticated } = useDoctorAuth();
   
-  // Don't show navbar on landing page and test page
+  // ✅ FIXED: Don't show navbar on landing page, test page, OR HomePage
   const shouldShowNavbar = isAuthenticated() && 
     location.pathname !== '/' && 
-    location.pathname !== '/test';
+    location.pathname !== '/test' &&
+    location.pathname !== '/HomePage';  // ← ADDED THIS LINE
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {shouldShowNavbar && <DoctorNavbar />}
       <Routes>
-        {/* Public Routes - No Authentication Required */}
+        {/* Public Routes */}
         <Route path="/" element={<ClinicalLandingPage />} />
         <Route path="/test" element={<TestPage />} />
         
-        {/* ✅ PROTECTED ROUTES - Require Authentication */}
+        {/* ✅ PROTECTED ROUTES */}
         <Route path="/HomePage" element={
           <ProtectedRoute>
             <HomePage />
@@ -102,7 +102,6 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
-        {/* Catch-all redirect to home */}
         <Route path="*" element={<Navigate to={isAuthenticated() ? "/HomePage" : "/"} replace />} />
       </Routes>
     </div>

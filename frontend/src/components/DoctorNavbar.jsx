@@ -1,3 +1,6 @@
+// DoctorNavbar.jsx - FIXED VERSION
+// This navbar will NOT show on the HomePage but will show on all other pages
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
@@ -17,30 +20,47 @@ function DoctorNavbar() {
 
   const isActive = (path) => location.pathname === path;
 
+  // Navigation items - these will show on all protected pages EXCEPT HomePage
   const navItems = [
-    { path: '/HomePage', label: 'Home', icon: <Home className="w-5 h-5" /> },
     { path: '/assessment', label: 'New Assessment', icon: <FileText className="w-5 h-5" /> },
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> }
   ];
 
   return (
-    <nav className="bg-white shadow-lg border-b-2 border-blue-500 sticky top-0 z-50">
+    <nav className="bg-white shadow-lg border-b-2 border-blue-600 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/HomePage')}>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+          {/* Logo - Now clickable to go to HomePage */}
+          <div 
+            className="flex items-center space-x-3 cursor-pointer" 
+            onClick={() => navigate('/HomePage')}
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
               <Heart className="w-6 h-6 text-white" />
             </div>
             <div className="hidden md:block">
-              <h1 className="text-lg font-bold text-gray-900">Newborn Health</h1>
-              <p className="text-xs text-gray-600">Monitor</p>
+              <h1 className="text-lg font-bold text-gray-900">Clinical Portal</h1>
+              <p className="text-xs text-gray-600 font-medium">Neonatal Assessment System</p>
             </div>
           </div>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-2">
+            {/* Home Button - Always visible */}
+            <button
+              onClick={() => navigate('/HomePage')}
+              className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${
+                isActive('/HomePage')
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Home className="w-5 h-5 mr-2" />
+              <span>Home</span>
+            </button>
+            
+            {/* Other navigation items */}
             {navItems.map((item) => (
               <button
                 key={item.path}
@@ -107,7 +127,7 @@ function DoctorNavbar() {
               )}
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-lg hover:bg-gray-100"
@@ -120,6 +140,22 @@ function DoctorNavbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-3 space-y-2">
+            {/* Home Button */}
+            <button
+              onClick={() => {
+                navigate('/HomePage');
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center px-4 py-3 rounded-lg font-semibold ${
+                isActive('/HomePage')
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Home className="w-5 h-5 mr-3" />
+              <span>Home</span>
+            </button>
+            
             {navItems.map((item) => (
               <button
                 key={item.path}
