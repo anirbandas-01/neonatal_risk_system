@@ -6,12 +6,10 @@ import os
 app = Flask(__name__)
 
 
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "newborn_health_lstm.h5")
 # Load model
-model = tf.keras.models.load_model(
-    r"../training/core_model/newborn_health_lstm.h5",
-      compile=False
-      )
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 # Mappings
 GENDER_MAP = {"male": 0, "female": 1}
@@ -73,5 +71,6 @@ def predict():
 def home():
     return jsonify({"status": "Newborn Health API"})
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=9000)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
