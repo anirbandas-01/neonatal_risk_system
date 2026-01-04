@@ -442,20 +442,36 @@ export default function ClinicalLandingPage() {
                   </div>
                 </div>
                 <div className="pt-20 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Your Name</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Anirban Das</h3>
                   <p className="text-blue-600 font-semibold mb-4">Full Stack Developer</p>
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     Passionate about building healthcare solutions with AI and modern web technologies.
                   </p>
                   <div className="flex justify-center space-x-4">
-                    <a href="#" className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
-                      <Mail className="w-5 h-5 text-blue-600" />
-                    </a>
-                    <a href="#" className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
-                      <Linkedin className="w-5 h-5 text-blue-600" />
-                    </a>
-                    <a href="#" className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
-                      <Github className="w-5 h-5 text-blue-600" />
+                    <a
+                        href="mailto:anirban140963@gmail.com"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                        title="Email"
+                        >
+                        <Mail className="w-5 h-5 text-blue-600" />
+                      </a>
+                    <a
+                        href="https://www.linkedin.com/in/anirban-das-b192a9260?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                        title="LinkedIn"
+                        >
+                        <Linkedin className="w-5 h-5 text-blue-600" />
+                      </a>
+                    <a
+                        href="https://github.com/anirbandas-01"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex  items-center justify-center transition-colors"
+                        title="GitHub"
+                        >
+                          <Github className="w-5 h-5 text-blue-600" />
                     </a>
                   </div>
                 </div>
@@ -472,8 +488,8 @@ export default function ClinicalLandingPage() {
                   </div>
                 </div>
                 <div className="pt-20 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Friend's Name</h3>
-                  <p className="text-indigo-600 font-semibold mb-4">ML Engineer & Backend Developer</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Abhisek Kundu</h3>
+                  <p className="text-indigo-600 font-semibold mb-4">ML Engineer</p>
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     Specializing in machine learning models and robust backend architectures for healthcare.
                   </p>

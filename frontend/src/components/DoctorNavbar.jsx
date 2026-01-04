@@ -1,6 +1,4 @@
-// DoctorNavbar.jsx - FIXED VERSION
-// This navbar will NOT show on the HomePage but will show on all other pages
-
+// DoctorNavbar.jsx - UPDATED VERSION WITH HOMEPAGE LOGIC
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
@@ -19,9 +17,13 @@ function DoctorNavbar() {
   };
 
   const isActive = (path) => location.pathname === path;
+  
+  // Check if we're on the HomePage
+  const isOnHomePage = location.pathname === '/HomePage';
 
-  // Navigation items - these will show on all protected pages EXCEPT HomePage
+  // Navigation items - will be hidden on HomePage
   const navItems = [
+    { path: '/HomePage', label: 'Home', icon: <Home className="w-5 h-5" /> },
     { path: '/assessment', label: 'New Assessment', icon: <FileText className="w-5 h-5" /> },
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> }
   ];
@@ -31,7 +33,7 @@ function DoctorNavbar() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo - Now clickable to go to HomePage */}
+          {/* Logo - Always clickable to HomePage */}
           <div 
             className="flex items-center space-x-3 cursor-pointer" 
             onClick={() => navigate('/HomePage')}
@@ -45,44 +47,36 @@ function DoctorNavbar() {
             </div>
           </div>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav - Conditional rendering based on page */}
           <div className="hidden md:flex items-center space-x-2">
-            {/* Home Button - Always visible */}
-            <button
-              onClick={() => navigate('/HomePage')}
-              className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${
-                isActive('/HomePage')
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <Home className="w-5 h-5 mr-2" />
-              <span>Home</span>
-            </button>
-            
-            {/* Other navigation items */}
-            {navItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${
-                  isActive(item.path)
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {item.icon}
-                <span className="ml-2">{item.label}</span>
-              </button>
-            ))}
+            {!isOnHomePage && (
+              <>
+                {navItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${
+                      isActive(item.path)
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="ml-2">{item.label}</span>
+                  </button>
+                ))}
+              </>
+            )}
           </div>
 
-          {/* Doctor Profile */}
+          {/* Doctor Profile Section */}
           <div className="flex items-center space-x-3">
-            <div className="hidden md:block text-right">
-              <p className="text-sm font-semibold text-gray-900">Dr. {doctor.name}</p>
+            <div className="hidden sm:block text-right">
+              <p className="text-sm font-semibold text-gray-900">
+                Dr. {doctor.name}
+              </p>
               <p className="text-xs text-green-600 flex items-center justify-end">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
                 Online
               </p>
             </div>
@@ -128,34 +122,20 @@ function DoctorNavbar() {
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {!isOnHomePage && (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
+        {/* Mobile Menu - Only show if not on HomePage */}
+        {!isOnHomePage && mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-3 space-y-2">
-            {/* Home Button */}
-            <button
-              onClick={() => {
-                navigate('/HomePage');
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center px-4 py-3 rounded-lg font-semibold ${
-                isActive('/HomePage')
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <Home className="w-5 h-5 mr-3" />
-              <span>Home</span>
-            </button>
-            
             {navItems.map((item) => (
               <button
                 key={item.path}

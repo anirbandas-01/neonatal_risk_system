@@ -1,4 +1,4 @@
-// App.jsx - UPDATED VERSION
+// App.jsx - FIXED VERSION - Navbar shows on HomePage
 
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DoctorAuthProvider, useDoctorAuth } from './context/DoctorAuthContext';
@@ -39,11 +39,11 @@ function AppContent() {
   const location = useLocation();
   const { isAuthenticated } = useDoctorAuth();
   
-  // ✅ FIXED: Don't show navbar on landing page, test page, OR HomePage
+  // ✅ FIXED: Show navbar on all authenticated pages (including HomePage)
+  // Only hide navbar on landing page and test page
   const shouldShowNavbar = isAuthenticated() && 
     location.pathname !== '/' && 
-    location.pathname !== '/test' &&
-    location.pathname !== '/HomePage';  // ← ADDED THIS LINE
+    location.pathname !== '/test';
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
