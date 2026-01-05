@@ -10,7 +10,6 @@ Authors: DarkMatterStack
 > Newborn Health Monitor is a research‑grade clinical decision support system (CDSS) that combines structured clinical inputs with a modular sequence‑modeling pipeline to produce actionable neonatal risk assessments and clinician‑ready prescriptions. This README is written in a concise, paper‑style format (abstract, methods, experiments, results, conclusions) and is intended to serve both as documentation for developers and as a readable summary for researchers and stakeholders.
 
 ![License](https://img.shields.io/badge/license-Unlicense-green) ![Version](https://img.shields.io/badge/version-1.0.0-blue) 
-![Language](https://img.shields.io/badge/language-Jupyter Notebook-yellow) 
 ![Framework](https://img.shields.io/badge/Framework-React%2C%20Node.js%2C%20Express%2C%20MongoDB%2C%20Nodemon-orange)
 
 
