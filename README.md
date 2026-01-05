@@ -3,7 +3,7 @@
 [![Project Banner](model/frontpage.png)](model/frontpage.png)
 
 Authors: DarkMatterStack 
-License: MIT
+
 
 Abstract
 --------
