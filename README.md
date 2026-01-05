@@ -2,7 +2,7 @@
 
 [![Project Banner](model/frontpage.png)](model/frontpage.png)
 
-Authors: Project Team  
+Authors: DarkMatterStack 
 License: MIT
 
 Abstract
