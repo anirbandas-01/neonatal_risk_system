@@ -256,7 +256,10 @@ Contributing
 
 Contact
 -------
-For collaboration or questions, open an issue on GitHub.
+- Name   : ANIRBAN DAS (Full Stack Developer)
+- github : anirbandas-01
+- Name   : ABHISEK KUNDU (AI/ML Engineer)
+- github : abhisekkundu-DS
 
 ----
 
