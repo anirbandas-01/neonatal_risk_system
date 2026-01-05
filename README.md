@@ -78,6 +78,17 @@ Model registry / experiments: MLflow or Weights & Biases; artifacts in S3; optio
 Containerization & orchestration: Docker + Kubernetes (Helm charts); local dev with docker-compose
 Dev tools: Prettier, ESLint, Husky + lint-staged, pytest/pytest-cov, jest + supertest, Dependabot/GitHub Dependabot
 
+<p align="center"> <img src="model/figures/logo.svg" alt="Newborn Health Monitor Logo" width="160"/> </p>
+🛠️ Technology Stack
+🔬 Machine Learning & Model Serving
+<p> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="36" alt="Python"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jupyter/jupyter-original.svg" height="36" alt="Jupyter"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" height="36" alt="TensorFlow"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" height="36" alt="PyTorch"/> <img src="https://fastapi.tiangolo.com/img/icon-white.svg" height="36" alt="FastAPI"/> </p>
+⚙️ Backend
+<p> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" height="36" alt="Node.js"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" height="36" alt="TypeScript"/> <img src="https://nestjs.com/img/logo-small.svg" height="36" alt="NestJS"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" height="36" alt="Express"/> </p>
+🎨 Frontend
+<p> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" height="36" alt="React"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg" height="36" alt="Vite"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" height="36" alt="TypeScript"/> <img src="https://raw.githubusercontent.com/tailwindlabs/tailwindcss/master/.github/logo-light.svg" height="28" alt="Tailwind CSS"/> </p>
+🗄️ Database & Infrastructure
+<p> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" height="36" alt="PostgreSQL"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" height="36" alt="MongoDB"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" height="36" alt="Docker"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" height="36" alt="Kubernetes"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" height="36" alt="GitHub Actions"/> </p>
+
 ## Contributing
 
 ------------
