@@ -11,9 +11,11 @@ exports.getStatistics = async (req, res) => {
     const mediumRisk = await Baby.countDocuments({ doctorId, currentRiskLevel: 'Medium Risk' });
     const highRisk = await Baby.countDocuments({doctorId, currentRiskLevel: 'High Risk' });
     
-    // Total assessments across all babies
-    const allBabies = await Baby.find();
-    const totalAssessments = allBabies.reduce((sum, baby) => sum + baby.totalVisits, 0);
+    const babies = await Baby.find({ doctorId }).select('assessments');
+    const totalAssessments = babies.reduce(
+      (sum, baby) => sum + baby.assessments.length,
+      0
+    );
     
     res.json({
       success: true,
