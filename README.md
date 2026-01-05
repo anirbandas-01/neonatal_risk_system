@@ -12,8 +12,7 @@ Authors: DarkMatterStack
 ![License](https://img.shields.io/badge/license-Unlicense-green) ![Version](https://img.shields.io/badge/version-1.0.0-blue) 
 ![Language](https://img.shields.io/badge/language-Jupyter Notebook-yellow)
 ![Framework](https://img.shields.io/badge/framework-React, Node JS, Express js , Mongodb , Nodemon , -orange)
-![GitHub](https://img.shields.io/badge/GitHub-anirbandas-01/neonatal_risk_system-black?logo=github)
-![Build Status](https://img.shields.io/github/actions/workflow/status/anirbandas-01/neonatal_risk_system/ci.yml?branch=main)
+
 
 ## 📋 Table of Contents
 
