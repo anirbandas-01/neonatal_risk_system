@@ -78,7 +78,7 @@ Model registry / experiments: MLflow or Weights & Biases; artifacts in S3; optio
 Containerization & orchestration: Docker + Kubernetes (Helm charts); local dev with docker-compose
 Dev tools: Prettier, ESLint, Husky + lint-staged, pytest/pytest-cov, jest + supertest, Dependabot/GitHub Dependabot
 
-<p align="center"> <img src="model/figures/logo.svg" alt="Newborn Health Monitor Logo" width="160"/> </p>
+
 🛠️ Technology Stack
 🔬 Machine Learning & Model Serving
 <p> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="36" alt="Python"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jupyter/jupyter-original.svg" height="36" alt="Jupyter"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" height="36" alt="TensorFlow"/> <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" height="36" alt="PyTorch"/> <img src="https://fastapi.tiangolo.com/img/icon-white.svg" height="36" alt="FastAPI"/> </p>
