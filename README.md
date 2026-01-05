@@ -1,6 +1,7 @@
 # Newborn Health Monitor — Clinical Decision Support System
 
 [![Project Banner](model/frontpage.png)](model/frontpage.png)
+[![website views](model/frontpage.png)](model/frontpage.png)
 
 Authors: DarkMatterStack 
 
