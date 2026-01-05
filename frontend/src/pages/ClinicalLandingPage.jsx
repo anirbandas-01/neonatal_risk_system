@@ -494,14 +494,30 @@ export default function ClinicalLandingPage() {
                     Specializing in machine learning models and robust backend architectures for healthcare.
                   </p>
                   <div className="flex justify-center space-x-4">
-                    <a href="#" className="w-10 h-10 bg-indigo-100 hover:bg-indigo-200 rounded-full flex items-center justify-center transition-colors">
-                      <Mail className="w-5 h-5 text-indigo-600" />
-                    </a>
-                    <a href="#" className="w-10 h-10 bg-indigo-100 hover:bg-indigo-200 rounded-full flex items-center justify-center transition-colors">
-                      <Linkedin className="w-5 h-5 text-indigo-600" />
-                    </a>
-                    <a href="#" className="w-10 h-10 bg-indigo-100 hover:bg-indigo-200 rounded-full flex items-center justify-center transition-colors">
-                      <Github className="w-5 h-5 text-indigo-600" />
+                    <a
+                        href="mailto:abhisek9723@gmail.com"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                        title="Email"
+                        >
+                        <Mail className="w-5 h-5 text-blue-600" />
+                      </a>
+                    <a
+                        href="https://www.linkedin.com/in/abhisek-kundu-ak?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                        title="LinkedIn"
+                        >
+                        <Linkedin className="w-5 h-5 text-blue-600" />
+                      </a>
+                    <a
+                        href="https://github.com/abhisekkundu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex  items-center justify-center transition-colors"
+                        title="GitHub"
+                        >
+                          <Github className="w-5 h-5 text-blue-600" />
                     </a>
                   </div>
                 </div>
