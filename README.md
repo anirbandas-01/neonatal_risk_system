@@ -1,7 +1,6 @@
 # Newborn Health Monitor — Clinical Decision Support System
 
 [![Project Banner](model/frontpage.png)](model/frontpage.png)
-[![website views](model/Screenshot11.png)](model/Screenshot11.png)
 [![website views](model/Screenshot12.png)](model/Screenshot12.png)
 [![website views](model/Screenshot13.png)](model/Screenshot13.png)
 [![website views](model/Screenshot14.png)](model/Screenshot14.png)
