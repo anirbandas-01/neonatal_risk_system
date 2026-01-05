@@ -1,6 +1,6 @@
 # Newborn Health Monitor — Clinical Decision Support System
 
-[![Project Banner](model/Screenshot 2026-01-05 222950.png)](model/Screenshot 2026-01-05 222950.png)
+[![Project Banner](model/frontpage.png)](model/frontpage.png)
 
 Authors: Project Team  
 License: MIT
