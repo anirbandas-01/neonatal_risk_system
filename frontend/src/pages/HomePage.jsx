@@ -298,13 +298,13 @@ function HomePage() {
       </footer>
 
       {/* Test Page Link */}
-      <Link 
+      {/* <Link 
         to="/test" 
         className="fixed bottom-6 right-6 w-14 h-14 bg-orange-500 hover:bg-orange-600 rounded-full shadow-2xl flex items-center justify-center text-white transition-all hover:scale-110 z-50"
         title="Test Page (Dev Only)"
       >
         <TestTube className="w-6 h-6" />
-      </Link>
+      </Link> */}
     </div>
   );
 }

@@ -20,7 +20,7 @@ import ProfilePage from './pages/ProfilePage';
 import DoctorNavbar from './components/DoctorNavbar';
 
 
-import TestSearchPage from './pages/TestSearchPage';
+
 
 // ✅ PROTECTED ROUTE COMPONENT
 const ProtectedRoute = ({ children }) => {
@@ -112,15 +112,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
-
-        <Route path="/test-search" element={
-        <ProtectedRoute>
-          <TestSearchPage />
-        </ProtectedRoute>
-        } />
-
-
-        <Route path="*" element={<Navigate to={isAuthenticated() ? "/HomePage" : "/"} replace />} />
+         <Route path="*" element={<Navigate to={isAuthenticated() ? "/HomePage" : "/"} replace />} />
       </Routes>
     </div>
   );
