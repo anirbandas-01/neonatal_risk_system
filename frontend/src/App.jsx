@@ -2,6 +2,9 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { DoctorAuthProvider, useDoctorAuth } from './context/DoctorAuthContext';
+import { SearchProvider } from './context/SearchContext';
+import GlobalSearch from './components/GlobalSearch';
+import GlobalSearchButton from './components/GlobalSearchButton'; 
 
 // Page imports
 import HomePage from './pages/HomePage';
@@ -15,6 +18,9 @@ import PrescriptionFormPage from './pages/PrescriptionFormPage';
 import PrescriptionViewPage from './pages/PrescriptionViewPage';
 import ProfilePage from './pages/ProfilePage';
 import DoctorNavbar from './components/DoctorNavbar';
+
+
+import TestSearchPage from './pages/TestSearchPage';
 
 // ✅ PROTECTED ROUTE COMPONENT
 const ProtectedRoute = ({ children }) => {
@@ -47,6 +53,10 @@ function AppContent() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <GlobalSearch />
+
+      {isAuthenticated() && location.pathname !== '/test' && <GlobalSearchButton />}
+
       {shouldShowNavbar && <DoctorNavbar />}
       <Routes>
         {/* Public Routes */}
@@ -102,6 +112,14 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
+
+        <Route path="/test-search" element={
+        <ProtectedRoute>
+          <TestSearchPage />
+        </ProtectedRoute>
+        } />
+
+
         <Route path="*" element={<Navigate to={isAuthenticated() ? "/HomePage" : "/"} replace />} />
       </Routes>
     </div>
@@ -111,11 +129,13 @@ function AppContent() {
 // ✅ MAIN APP COMPONENT
 function App() {
   return (
-    <DoctorAuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </DoctorAuthProvider>
+    <Router>
+      <DoctorAuthProvider>
+        <SearchProvider>
+          <AppContent />
+        </SearchProvider>
+      </DoctorAuthProvider>
+    </Router>
   );
 }
 

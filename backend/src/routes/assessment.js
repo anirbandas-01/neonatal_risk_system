@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+router.get('/babies/search', babyController.searchBabies);
 
 router.get('/baby/:babyId/exists', babyController.checkBabyExists);
 router.get('/baby/:babyId/history', babyController.getBabyHistory);

@@ -58,7 +58,21 @@ export const babyAPI = {
   deleteBaby: async (babyId) => {
     const response = await api.delete(`/baby/${babyId}`);
     return response.data;
+  },
+
+  search: async (query) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/babies/search`, {
+        params: { q: query, limit: 20 },
+        //headers: getAuthHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Search API error:', error);
+      throw error;
+    }
   }
+
 };
 
 export const assessmentAPI = {

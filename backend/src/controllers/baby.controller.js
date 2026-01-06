@@ -141,3 +141,106 @@ exports.deleteBaby = async (req, res) => {
     });
   }
 };
+
+/* exports.searchBabies = async (req, res) => {
+  const { q, limit = 10 } = req.query;
+  const doctorId = req.doctor.id;
+  
+  if (!q || q.length < 2) {
+    return res.json({ success: true, results: [], count: 0 });
+  }
+  
+  // Search multiple fields
+  const searchRegex = new RegExp(q, 'i');
+  
+  const babies = await Baby.find({
+    doctorId,
+    $or: [
+      { babyId: searchRegex },
+      { 'babyInfo.name': searchRegex },
+      { 'parentInfo.motherName': searchRegex },
+      { 'parentInfo.fatherName': searchRegex },
+      { 'parentInfo.contactNumber': searchRegex }
+    ]
+  })
+  .select('babyId babyInfo parentInfo currentRiskLevel lastVisitDate totalVisits')
+  .sort({ lastVisitDate: -1 })
+  .limit(parseInt(limit));
+  
+  // Calculate age in days for each baby
+  const results = babies.map(baby => ({
+    ...baby.toObject(),
+    ageDays: Math.floor((Date.now() - new Date(baby.babyInfo.dateOfBirth)) / (1000 * 60 * 60 * 24))
+  }));
+  
+  res.json({
+    success: true,
+    results,
+    count: results.length
+  });
+}; */
+
+
+exports.searchBabies = async (req, res) => {
+  try {
+    const { q, limit = 20 } = req.query;
+    const doctorId = req.doctor.id;
+    
+    // Validate query
+    if (!q || q.trim().length < 1) {
+      return res.json({
+        success: true,
+        results: [],
+        count: 0,
+        message: 'Query too short'
+      });
+    }
+
+    // Create case-insensitive regex for search
+    const searchRegex = new RegExp(q.trim(), 'i');
+    
+    // Search across multiple fields
+    const babies = await Baby.find({
+      doctorId,
+      $or: [
+        { babyId: searchRegex },
+        { 'babyInfo.name': searchRegex },
+        { 'parentInfo.motherName': searchRegex },
+        { 'parentInfo.fatherName': searchRegex },
+        { 'parentInfo.contactNumber': { $regex: q.trim() } } // Exact match for phone
+      ]
+    })
+    .select('babyId babyInfo parentInfo currentRiskLevel lastVisitDate totalVisits')
+    .sort({ 
+      lastVisitDate: -1,  // Most recent first
+      currentRiskLevel: 1  // High risk first
+    })
+    .limit(parseInt(limit));
+    
+    // Calculate age in days for each baby
+    const results = babies.map(baby => {
+      const ageInDays = Math.floor(
+        (Date.now() - new Date(baby.babyInfo.dateOfBirth)) / (1000 * 60 * 60 * 24)
+      );
+      
+      return {
+        ...baby.toObject(),
+        ageDays: ageInDays
+      };
+    });
+    
+    res.json({
+      success: true,
+      results,
+      count: results.length
+    });
+
+  } catch (error) {
+    console.error('Search babies error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Search failed',
+      error: error.message
+    });
+  }
+};
