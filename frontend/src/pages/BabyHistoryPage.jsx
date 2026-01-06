@@ -4,6 +4,9 @@ import { ArrowLeft, Plus, Calendar, TrendingDown, TrendingUp, Minus, Loader, Eye
 import { babyAPI } from '../services/api';
 import { getRiskColor, formatDate } from '../utils/helpers';
 
+// ✅ ADDED IMPORT - STEP 5
+import ClinicalSummaryDashboard from '../components/ClinicalSummaryDashboard';
+
 function BabyHistoryPage() {
   const { babyId } = useParams();
   const navigate = useNavigate();
@@ -73,6 +76,7 @@ function BabyHistoryPage() {
     return 'stable';
   };
 
+  // ✅ ADDED LOADING STATE - STEP 5
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
@@ -174,7 +178,15 @@ function BabyHistoryPage() {
           </div>
         </div>
 
-        {/* Clinical Record Summary - NEW SECTION */}
+        {/* ✅ ADDED CLINICAL SUMMARY DASHBOARD - STEP 5 */}
+        <div className="mb-8">
+          <ClinicalSummaryDashboard 
+            baby={baby}
+            assessments={baby.assessments}
+          />
+        </div>
+
+        {/* Clinical Record Summary */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-600">
           <div className="flex items-center mb-4">
             <FileText className="w-6 h-6 text-blue-600 mr-3" />
@@ -227,7 +239,7 @@ function BabyHistoryPage() {
           </div>
         </div>
 
-        {/* Statistics Cards - IMPROVED */}
+        {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           
           {/* Total Visits */}
@@ -314,7 +326,7 @@ function BabyHistoryPage() {
           </div>
         </div>
 
-        {/* Assessment Timeline - ENHANCED */}
+        {/* Assessment Timeline */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
@@ -448,7 +460,7 @@ function BabyHistoryPage() {
           )}
         </div>
 
-        {/* Clinical Decision Support Disclaimer - NEW */}
+        {/* Clinical Decision Support Disclaimer */}
         <div className="mt-12 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-8 border-2 border-yellow-400">
           <div className="flex items-start">
             <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
