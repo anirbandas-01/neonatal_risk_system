@@ -18,7 +18,7 @@ import PrescriptionFormPage from './pages/PrescriptionFormPage';
 import PrescriptionViewPage from './pages/PrescriptionViewPage';
 import ProfilePage from './pages/ProfilePage';
 import DoctorNavbar from './components/DoctorNavbar';
-
+import PrescriptionCreatePage from './pages/PrescriptionCreatePage'; 
 
 
 
@@ -94,12 +94,20 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
-        <Route path="/prescription/create/:assessmentId" element={
+       {/*  <Route path="/prescription/create/:assessmentId" element={
           <ProtectedRoute>
             <PrescriptionFormPage />
           </ProtectedRoute>
-        } />
+        } /> */}
         
+        <Route  path="/prescription/create" 
+          element={<ProtectedRoute><PrescriptionCreatePage /></ProtectedRoute>} 
+        />
+        <Route 
+          path="/prescription/view/:prescriptionId" 
+          element={<ProtectedRoute><PrescriptionViewPage /></ProtectedRoute>} 
+        />
+
         <Route path="/prescription/:prescriptionId/view" element={
           <ProtectedRoute>
             <PrescriptionViewPage />

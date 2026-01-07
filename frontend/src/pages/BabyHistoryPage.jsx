@@ -1,11 +1,13 @@
+// frontend/src/pages/BabyHistoryPage.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Calendar, TrendingDown, TrendingUp, Minus, Loader, Eye, Shield, Clock, History, AlertCircle, FileText } from 'lucide-react';
 import { babyAPI } from '../services/api';
 import { getRiskColor, formatDate } from '../utils/helpers';
-
-// ✅ ADDED IMPORT - STEP 5
 import ClinicalSummaryDashboard from '../components/ClinicalSummaryDashboard';
+import PrescriptionHistoryTab from '../components/PrescriptionHistoryTab';
+import { prescriptionService } from '../services/prescriptionService';
 
 function BabyHistoryPage() {
   const { babyId } = useParams();
@@ -14,6 +16,7 @@ function BabyHistoryPage() {
   const [baby, setBaby] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'assessments', 'prescriptions'
 
   useEffect(() => {
     fetchBabyHistory();
@@ -76,7 +79,6 @@ function BabyHistoryPage() {
     return 'stable';
   };
 
-  // ✅ ADDED LOADING STATE - STEP 5
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
@@ -178,286 +180,385 @@ function BabyHistoryPage() {
           </div>
         </div>
 
-        {/* ✅ ADDED CLINICAL SUMMARY DASHBOARD - STEP 5 */}
-        <div className="mb-8">
-          <ClinicalSummaryDashboard 
-            baby={baby}
-            assessments={baby.assessments}
-          />
-        </div>
-
-        {/* Clinical Record Summary */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-600">
-          <div className="flex items-center mb-4">
-            <FileText className="w-6 h-6 text-blue-600 mr-3" />
-            <h3 className="text-xl font-bold text-gray-800">Clinical Record Summary</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-gray-600 font-semibold mb-1">Record ID</p>
-              <p className="font-mono font-bold text-gray-900">{baby.babyId}</p>
-            </div>
-            
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <p className="text-gray-600 font-semibold mb-1">Total Clinical Visits</p>
-              <p className="text-2xl font-bold text-purple-700">{baby.totalVisits}</p>
-            </div>
-            
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-gray-600 font-semibold mb-1">First Assessment</p>
-              <p className="font-semibold text-gray-900">
-                {baby.assessments.length > 0 
-                  ? new Date(baby.assessments[baby.assessments.length - 1].assessmentDate).toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })
-                  : 'N/A'
-                }
-              </p>
-            </div>
-            
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <p className="text-gray-600 font-semibold mb-1">Most Recent Visit</p>
-              <p className="font-semibold text-gray-900">
-                {new Date(baby.lastVisitDate).toLocaleDateString('en-US', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-            </div>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Primary Care Team:</span> Clinical Assessment System
-            </p>
-          </div>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          
-          {/* Total Visits */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600 font-semibold">Total Clinical Visits</p>
-              <Calendar className="w-5 h-5 text-blue-500" />
-            </div>
-            <p className="text-3xl font-bold text-gray-800">{baby.totalVisits}</p>
-            <p className="text-xs text-gray-500 mt-1">Assessment records</p>
-          </div>
-
-          {/* Current Risk */}
-          <div className={`bg-white rounded-xl shadow-lg p-6 border-l-4 ${
-            baby.currentRiskLevel === 'Low Risk' ? 'border-green-500' :
-            baby.currentRiskLevel === 'Medium Risk' ? 'border-yellow-500' :
-            'border-red-500'
-          } hover:shadow-xl transition-shadow`}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600 font-semibold">Current Risk Status</p>
-              <Shield className={`w-5 h-5 ${
-                baby.currentRiskLevel === 'Low Risk' ? 'text-green-500' :
-                baby.currentRiskLevel === 'Medium Risk' ? 'text-yellow-500' :
-                'text-red-500'
-              }`} />
-            </div>
-            <p className={`text-2xl font-bold ${
-              baby.currentRiskLevel === 'Low Risk' ? 'text-green-600' :
-              baby.currentRiskLevel === 'Medium Risk' ? 'text-yellow-600' :
-              'text-red-600'
-            }`}>
-              {baby.currentRiskLevel}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {baby.currentRiskLevel === 'Low Risk' ? 'Routine monitoring' :
-               baby.currentRiskLevel === 'Medium Risk' ? 'Enhanced observation' :
-               'Immediate attention'}
-            </p>
-          </div>
-
-          {/* Last Visit */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600 font-semibold">Last Assessment</p>
-              <Clock className="w-5 h-5 text-purple-500" />
-            </div>
-            <p className="text-lg font-bold text-gray-800">
-              {new Date(baby.lastVisitDate).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {Math.floor((new Date() - new Date(baby.lastVisitDate)) / (1000 * 60 * 60 * 24))} days ago
-            </p>
-          </div>
-
-          {/* Risk Trend */}
-          <div className={`bg-white rounded-xl shadow-lg p-6 border-l-4 ${
-            trend === 'improving' ? 'border-green-500' :
-            trend === 'worsening' ? 'border-red-500' :
-            'border-gray-500'
-          } hover:shadow-xl transition-shadow`}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600 font-semibold">Risk Trajectory</p>
-              {trend === 'improving' && <TrendingDown className="w-5 h-5 text-green-600" />}
-              {trend === 'worsening' && <TrendingUp className="w-5 h-5 text-red-600" />}
-              {trend === 'stable' && <Minus className="w-5 h-5 text-gray-600" />}
-            </div>
-            
-            <p className={`text-lg font-bold ${
-              trend === 'improving' ? 'text-green-600' :
-              trend === 'worsening' ? 'text-red-600' :
-              'text-gray-600'
-            }`}>
-              {trend === 'improving' ? 'Improving' : trend === 'worsening' ? 'Worsening' : trend === 'stable' ? 'Stable' : 'Insufficient Data'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {trend === 'improving' ? 'Positive clinical progress' :
-               trend === 'worsening' ? 'Requires attention' :
-               trend === 'stable' ? 'Consistent monitoring' : 'Need more assessments'}
-            </p>
-          </div>
-        </div>
-
-        {/* Assessment Timeline */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <History className="w-6 h-6 text-blue-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-800">Clinical Assessment History</h2>
-            </div>
-            <span className="text-sm text-gray-600 font-semibold">
-              {baby.assessments.length} Total Assessment{baby.assessments.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          
-          {baby.assessments.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4 text-lg font-semibold">No Clinical Assessments on Record</p>
+        {/* ✅ TABBED INTERFACE */}
+        <div className="bg-white rounded-xl shadow-lg mb-8">
+          {/* Tab Headers */}
+          <div className="border-b border-gray-200">
+            <div className="flex overflow-x-auto">
               <button
-                onClick={handleAddAssessment}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold"
+                onClick={() => setActiveTab('overview')}
+                className={`px-6 py-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'overview'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
               >
-                Create First Assessment
+                📊 Clinical Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('assessments')}
+                className={`px-6 py-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'assessments'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                🏥 Assessment History ({baby.assessments.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('prescriptions')}
+                className={`px-6 py-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'prescriptions'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                💊 Prescriptions
               </button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {baby.assessments.map((assessment, index) => (
-                <div
-                  key={assessment._id}
-                  className="border-l-4 border-blue-500 pl-6 relative hover:bg-gray-50 rounded-r-lg transition-colors"
-                >
-                  <div className="absolute left-0 top-6 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-2"></div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div className="space-y-8">
+                {/* Clinical Summary Dashboard */}
+                <ClinicalSummaryDashboard 
+                  baby={baby}
+                  assessments={baby.assessments}
+                />
+                
+                {/* Clinical Record Summary */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
+                  <div className="flex items-center mb-4">
+                    <FileText className="w-6 h-6 text-blue-600 mr-3" />
+                    <h3 className="text-xl font-bold text-gray-800">Clinical Record Summary</h3>
+                  </div>
                   
-                  <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-gray-600 font-semibold mb-1">Record ID</p>
+                      <p className="font-mono font-bold text-gray-900">{baby.babyId}</p>
+                    </div>
                     
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <Calendar className="w-5 h-5 text-gray-500 mr-2" />
-                          <span className="text-lg font-semibold text-gray-800">
-                            Assessment #{baby.assessments.length - index}
-                          </span>
-                          {index === 0 && (
-                            <span className="ml-3 px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
-                              Most Recent
-                            </span>
-                          )}
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 font-medium">
-                          {new Date(assessment.assessmentDate).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                        
-                        <p className="text-xs text-gray-500 mt-1">
-                          {Math.floor((new Date() - new Date(assessment.assessmentDate)) / (1000 * 60 * 60 * 24))} days ago
-                        </p>
-                      </div>
-                      
-                      <div className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                        getRiskColor(assessment.riskAssessment.finalRisk)
-                      }`}>
-                        {assessment.riskAssessment.finalRisk}
-                      </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <p className="text-gray-600 font-semibold mb-1">Total Clinical Visits</p>
+                      <p className="text-2xl font-bold text-purple-700">{baby.totalVisits}</p>
                     </div>
-
-                    <div className="mb-4 p-3 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700 font-semibold">
-                          Model Confidence Score
-                        </span>
-                        <span className="text-lg font-bold text-indigo-700">
-                          {(assessment.riskAssessment.confidence * 100).toFixed(1)}%
-                        </span>
-                      </div>
+                    
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <p className="text-gray-600 font-semibold mb-1">First Assessment</p>
+                      <p className="font-semibold text-gray-900">
+                        {baby.assessments.length > 0 
+                          ? new Date(baby.assessments[baby.assessments.length - 1].assessmentDate).toLocaleDateString('en-US', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            })
+                          : 'N/A'
+                        }
+                      </p>
                     </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-3">Key Clinical Parameters</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <p className="text-xs text-gray-500">Weight (kg)</p>
-                          <p className="font-semibold text-gray-800">
-                            {assessment.healthParameters.weightKg || assessment.healthParameters.birthWeightKg || 'N/A'}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <p className="text-xs text-gray-500">Temp (°C)</p>
-                          <p className="font-semibold text-gray-800">
-                            {assessment.healthParameters.temperatureC || assessment.healthParameters.temperature || 'N/A'}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <p className="text-xs text-gray-500">SpO₂ (%)</p>
-                          <p className="font-semibold text-gray-800">
-                            {assessment.healthParameters.oxygenSaturation || 'N/A'}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <p className="text-xs text-gray-500">APGAR</p>
-                          <p className="font-semibold text-gray-800">
-                            {assessment.healthParameters.apgarScore || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
+                    
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <p className="text-gray-600 font-semibold mb-1">Most Recent Visit</p>
+                      <p className="font-semibold text-gray-900">
+                        {new Date(baby.lastVisitDate).toLocaleDateString('en-US', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
                     </div>
-
-                    {assessment.doctorNotes && (
-                      <div className="mt-4 p-3 bg-yellow-50 rounded border-l-4 border-yellow-500">
-                        <p className="text-sm text-gray-700">
-                          <strong className="text-yellow-800">Clinical Notes:</strong> {assessment.doctorNotes}
-                        </p>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => handleViewAssessment(assessment)}
-                      className="mt-4 w-full flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
-                    >
-                      <Eye className="w-5 h-5 mr-2" />
-                      View Complete Assessment Report
-                    </button>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold">Primary Care Team:</span> Clinical Assessment System
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+
+                {/* Statistics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  
+                  {/* Total Visits */}
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-600 font-semibold">Total Clinical Visits</p>
+                      <Calendar className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <p className="text-3xl font-bold text-gray-800">{baby.totalVisits}</p>
+                    <p className="text-xs text-gray-500 mt-1">Assessment records</p>
+                  </div>
+
+                  {/* Current Risk */}
+                  <div className={`bg-white rounded-xl shadow-lg p-6 border-l-4 ${
+                    baby.currentRiskLevel === 'Low Risk' ? 'border-green-500' :
+                    baby.currentRiskLevel === 'Medium Risk' ? 'border-yellow-500' :
+                    'border-red-500'
+                  } hover:shadow-xl transition-shadow`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-600 font-semibold">Current Risk Status</p>
+                      <Shield className={`w-5 h-5 ${
+                        baby.currentRiskLevel === 'Low Risk' ? 'text-green-500' :
+                        baby.currentRiskLevel === 'Medium Risk' ? 'text-yellow-500' :
+                        'text-red-500'
+                      }`} />
+                    </div>
+                    <p className={`text-2xl font-bold ${
+                      baby.currentRiskLevel === 'Low Risk' ? 'text-green-600' :
+                      baby.currentRiskLevel === 'Medium Risk' ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {baby.currentRiskLevel}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {baby.currentRiskLevel === 'Low Risk' ? 'Routine monitoring' :
+                      baby.currentRiskLevel === 'Medium Risk' ? 'Enhanced observation' :
+                      'Immediate attention'}
+                    </p>
+                  </div>
+
+                  {/* Last Visit */}
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-600 font-semibold">Last Assessment</p>
+                      <Clock className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <p className="text-lg font-bold text-gray-800">
+                      {new Date(baby.lastVisitDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {Math.floor((new Date() - new Date(baby.lastVisitDate)) / (1000 * 60 * 60 * 24))} days ago
+                    </p>
+                  </div>
+
+                  {/* Risk Trend */}
+                  <div className={`bg-white rounded-xl shadow-lg p-6 border-l-4 ${
+                    trend === 'improving' ? 'border-green-500' :
+                    trend === 'worsening' ? 'border-red-500' :
+                    'border-gray-500'
+                  } hover:shadow-xl transition-shadow`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-600 font-semibold">Risk Trajectory</p>
+                      {trend === 'improving' && <TrendingDown className="w-5 h-5 text-green-600" />}
+                      {trend === 'worsening' && <TrendingUp className="w-5 h-5 text-red-600" />}
+                      {trend === 'stable' && <Minus className="w-5 h-5 text-gray-600" />}
+                    </div>
+                    
+                    <p className={`text-lg font-bold ${
+                      trend === 'improving' ? 'text-green-600' :
+                      trend === 'worsening' ? 'text-red-600' :
+                      'text-gray-600'
+                    }`}>
+                      {trend === 'improving' ? 'Improving' : trend === 'worsening' ? 'Worsening' : trend === 'stable' ? 'Stable' : 'Insufficient Data'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {trend === 'improving' ? 'Positive clinical progress' :
+                      trend === 'worsening' ? 'Requires attention' :
+                      trend === 'stable' ? 'Consistent monitoring' : 'Need more assessments'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Assessments Tab */}
+            {activeTab === 'assessments' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <History className="w-6 h-6 text-blue-600 mr-3" />
+                    <h2 className="text-2xl font-bold text-gray-800">Clinical Assessment History</h2>
+                  </div>
+                  <span className="text-sm text-gray-600 font-semibold">
+                    {baby.assessments.length} Total Assessment{baby.assessments.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                
+                {baby.assessments.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4 text-lg font-semibold">No Clinical Assessments on Record</p>
+                    <button
+                      onClick={handleAddAssessment}
+                      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold"
+                    >
+                      Create First Assessment
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {baby.assessments.map((assessment, index) => (
+                      <div
+                        key={assessment._id}
+                        className="border-l-4 border-blue-500 pl-6 relative hover:bg-gray-50 rounded-r-lg transition-colors"
+                      >
+                        <div className="absolute left-0 top-6 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-2"></div>
+                        
+                        <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
+                          
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center mb-2">
+                                <Calendar className="w-5 h-5 text-gray-500 mr-2" />
+                                <span className="text-lg font-semibold text-gray-800">
+                                  Assessment #{baby.assessments.length - index}
+                                </span>
+                                {index === 0 && (
+                                  <span className="ml-3 px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                                    Most Recent
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <p className="text-sm text-gray-600 font-medium">
+                                {new Date(assessment.assessmentDate).toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                              
+                              <p className="text-xs text-gray-500 mt-1">
+                                {Math.floor((new Date() - new Date(assessment.assessmentDate)) / (1000 * 60 * 60 * 24))} days ago
+                              </p>
+                            </div>
+                            
+                            <div className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                              getRiskColor(assessment.riskAssessment.finalRisk)
+                            }`}>
+                              {assessment.riskAssessment.finalRisk}
+                            </div>
+                          </div>
+
+                          <div className="mb-4 p-3 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-700 font-semibold">
+                                Model Confidence Score
+                              </span>
+                              <span className="text-lg font-bold text-indigo-700">
+                                {(assessment.riskAssessment.confidence * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <p className="text-sm font-semibold text-gray-700 mb-3">Key Clinical Parameters</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                <p className="text-xs text-gray-500">Weight (kg)</p>
+                                <p className="font-semibold text-gray-800">
+                                  {assessment.healthParameters.weightKg || assessment.healthParameters.birthWeightKg || 'N/A'}
+                                </p>
+                              </div>
+                              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                <p className="text-xs text-gray-500">Temp (°C)</p>
+                                <p className="font-semibold text-gray-800">
+                                  {assessment.healthParameters.temperatureC || assessment.healthParameters.temperature || 'N/A'}
+                                </p>
+                              </div>
+                              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                <p className="text-xs text-gray-500">SpO₂ (%)</p>
+                                <p className="font-semibold text-gray-800">
+                                  {assessment.healthParameters.oxygenSaturation || 'N/A'}
+                                </p>
+                              </div>
+                              <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                <p className="text-xs text-gray-500">APGAR</p>
+                                <p className="font-semibold text-gray-800">
+                                  {assessment.healthParameters.apgarScore || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {assessment.doctorNotes && (
+                            <div className="mt-4 p-3 bg-yellow-50 rounded border-l-4 border-yellow-500">
+                              <p className="text-sm text-gray-700">
+                                <strong className="text-yellow-800">Clinical Notes:</strong> {assessment.doctorNotes}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* ✅ CORRECTED: DUAL-BUTTON LAYOUT */}
+                          <div className="mt-4 flex gap-2">
+                            <button
+                              onClick={() => handleViewAssessment(assessment)}
+                              className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+                            >
+                              <Eye className="w-5 h-5 mr-2" />
+                              View Complete Assessment
+                            </button>
+                            
+                            <button
+                              onClick={async () => {
+                                // Check if prescription already exists
+                                try {
+                                  const existingRx = await prescriptionService.getByAssessmentId(assessment._id);
+                                  if (existingRx.success && existingRx.data) {
+                                    // Prescription exists, view it
+                                    navigate(`/prescription/view/${existingRx.data._id}`);
+                                  } else {
+                                    // No prescription, create new
+                                    navigate('/prescription/create', {
+                                      state: {
+                                        assessmentId: assessment._id,
+                                        assessmentData: {
+                                          ...assessment,
+                                          babyId: baby.babyId,
+                                          babyInfo: baby.babyInfo,
+                                          parentInfo: baby.parentInfo
+                                        }
+                                      }
+                                    });
+                                  }
+                                } catch (err) {
+                                  console.error('Prescription check failed:', err);
+                                  // Default to create new
+                                  navigate('/prescription/create', {
+                                    state: {
+                                      assessmentId: assessment._id,
+                                      assessmentData: {
+                                        ...assessment,
+                                        babyId: baby.babyId,
+                                        babyInfo: baby.babyInfo,
+                                        parentInfo: baby.parentInfo
+                                      }
+                                    }
+                                  });
+                                }
+                              }}
+                              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors flex items-center"
+                            >
+                              <FileText className="w-5 h-5 mr-2" />
+                              Prescription
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Prescriptions Tab */}
+            {activeTab === 'prescriptions' && (
+              <PrescriptionHistoryTab baby={baby} />
+            )}
+          </div>
         </div>
 
         {/* Clinical Decision Support Disclaimer */}

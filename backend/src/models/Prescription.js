@@ -127,5 +127,6 @@ const prescriptionSchema = new mongoose.Schema({
 prescriptionSchema.index({ 'patient.baby_id': 1 });
 prescriptionSchema.index({ createdAt: -1 });
 prescriptionSchema.index({ assessment_id: 1 });
+prescriptionSchema.index({ 'patient.baby_id': 1, createdAt: -1 });
 
 module.exports = mongoose.model('Prescription', prescriptionSchema);

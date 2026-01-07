@@ -485,18 +485,14 @@ React.useEffect(() => {
           </button> */}
          <button 
   onClick={() => {
-    // Get the assessment ID - check multiple possible locations
-    let assessmentIdToUse = null;
     
-    // Method 1: From the assessment object passed from BabyHistoryPage
-    if (assessmentData._id) {
+    let assessmentIdToUse = null;
+/*     if (assessmentData._id) {
       assessmentIdToUse = assessmentData._id;
     }
-    // Method 2: From the assessment object inside assessmentData
     else if (assessmentData.assessment && assessmentData.assessment._id) {
       assessmentIdToUse = assessmentData.assessment._id;
     }
-    // Method 3: Try to extract from nested structure
     else if (assessmentData.latestAssessment && assessmentData.latestAssessment._id) {
       assessmentIdToUse = assessmentData.latestAssessment._id;
     }
@@ -521,6 +517,33 @@ React.useEffect(() => {
           riskAssessment: assessmentData.riskAssessment,
           // Make sure the ID is explicitly set
           assessmentId: assessmentIdToUse
+        }
+      }
+    }); */
+
+    if (assessmentData._id) {
+      assessmentId = assessmentData._id;
+    } else if (assessmentData.latestAssessment?._id) {
+      assessmentId = assessmentData.latestAssessment._id;
+    } else if (assessmentData.assessment?._id) {
+      assessmentId = assessmentData.assessment._id;
+    }
+    
+    if (!assessmentId) {
+      console.error('❌ Assessment ID not found in:', assessmentData);
+      alert('Unable to create prescription. Assessment ID missing. Please try again from patient history.');
+      return;
+    }
+    
+    console.log('✅ Creating prescription for assessment:', assessmentId);
+    
+    // Navigate with complete data
+    navigate('/prescription/create', {
+      state: { 
+        assessmentId,
+        assessmentData: {
+          ...assessmentData,
+          assessmentId, // Ensure it's explicitly set
         }
       }
     });
