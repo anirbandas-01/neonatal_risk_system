@@ -225,6 +225,10 @@ function AssessmentFormPage() {
     
     try {
 
+      const genderForPrediction = babyType === 'new' 
+      ? babyInfo.gender  
+      : selectedBaby?.babyInfo?.gender;
+
        let formattedParentInfo = { ...parentInfo };
         if (babyType === 'new' && parentInfo.contactNumber) {
           const validation = validateIndianPhone(parentInfo.contactNumber);
@@ -257,9 +261,26 @@ function AssessmentFormPage() {
           jaundiceLevelMgDl: parseFloat(healthParameters.jaundiceLevelMgDl),
           apgarScore: parseInt(healthParameters.apgarScore),
           immunizationsDone: healthParameters.immunizationsDone,
-          reflexesNormal: healthParameters.reflexesNormal
+          reflexesNormal: healthParameters.reflexesNormal,
+          gender: genderForPrediction
         },
-        doctorNotes: doctorNotes
+        doctorNotes: doctorNotes,
+          babyInfo: {
+        name: babyType === 'new' ? babyInfo.name : selectedBaby?.babyInfo?.name,
+        dateOfBirth: babyType === 'new' ? babyInfo.dateOfBirth : selectedBaby?.babyInfo?.dateOfBirth,
+        gender: genderForPrediction, // Use the same gender
+        bloodGroup: babyType === 'new' ? babyInfo.bloodGroup : selectedBaby?.babyInfo?.bloodGroup
+      },
+      // ✅ Include parentInfo for all assessments
+      parentInfo: babyType === 'new' 
+        ? formattedParentInfo 
+        : {
+            motherName: selectedBaby?.parentInfo?.motherName || '',
+            fatherName: selectedBaby?.parentInfo?.fatherName || '',
+            contactNumber: selectedBaby?.parentInfo?.contactNumber || '',
+            email: selectedBaby?.parentInfo?.email || '',
+            address: selectedBaby?.parentInfo?.address || ''
+          }
       };
       
       if (babyType === 'new') {

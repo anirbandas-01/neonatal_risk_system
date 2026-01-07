@@ -486,7 +486,7 @@ React.useEffect(() => {
          <button 
   onClick={() => {
     
-    let assessmentIdToUse = null;
+   // let assessmentIdToUse = null;
 /*     if (assessmentData._id) {
       assessmentIdToUse = assessmentData._id;
     }
@@ -520,8 +520,8 @@ React.useEffect(() => {
         }
       }
     }); */
-
-    if (assessmentData._id) {
+   let assessmentId = null;
+ if (assessmentData._id) {
       assessmentId = assessmentData._id;
     } else if (assessmentData.latestAssessment?._id) {
       assessmentId = assessmentData.latestAssessment._id;
