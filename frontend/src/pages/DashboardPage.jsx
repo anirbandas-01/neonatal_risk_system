@@ -400,7 +400,7 @@ function DashboardPage() {
                     </div>
                   </div>
                   
-                  <button
+{/*                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate('/assessment', { state: { baby } });
@@ -408,7 +408,31 @@ function DashboardPage() {
                     className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
                   >
                     New Assessment
-                  </button>
+                  </button> */}
+                      <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              
+                              try {
+                                // 🔥 FIX: Fetch complete baby data with assessments before navigating
+                                const response = await babyAPI.getHistory(baby.babyId);
+                                const completeBabyData = response.data;
+                                
+                                navigate('/assessment', { 
+                                  state: { 
+                                    baby: completeBabyData  // Now has full assessments array for prefill
+                                  } 
+                                });
+                              } catch (error) {
+                                console.error('Failed to load baby details:', error);
+                                // Fallback: navigate with available data
+                                navigate('/assessment', { state: { baby } });
+                              }
+                            }}
+                            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+                          >
+                            New Assessment
+                      </button>
                 </div>
               ))}
             </div>

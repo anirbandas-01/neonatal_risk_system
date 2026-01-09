@@ -1,30 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Save, AlertCircle, CheckCircle, Search, Plus, Baby, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle, CheckCircle, Search, Plus, Baby, Sparkles, Copy} from 'lucide-react';
 import BabyInfoForm from '../components/BabyInfoForm';
 import InputField from '../components/InputField';
 import SelectField from '../components/SelectField';
 import { generateBabyId, formatDate } from '../utils/helpers';
 import { assessmentAPI, babyAPI } from '../services/api';
 import { validateIndianPhone } from '../utils/phoneValidation';
-
+import { 
+  calculateAgeDays, 
+  prefillFromLastAssessment,
+  getChangedFields 
+} from '../utils/assessmentHelpers';
 
 function AssessmentFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const from = location.state?.from || '/HomePage';
-
-  
   const existingBaby = location.state?.baby;
   
   const [step, setStep] = useState(existingBaby ? 3 : 1);
   const [babyType, setBabyType] = useState(existingBaby ? 'existing' : null);
-  
   const [searchId, setSearchId] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
-  
   const [selectedBaby, setSelectedBaby] = useState(existingBaby || null);
   const [babyId, setBabyId] = useState(existingBaby?.babyId || '');
   
@@ -43,7 +42,6 @@ function AssessmentFormPage() {
     address: ''
   });
   
-  // Updated health parameters matching model
   const [healthParameters, setHealthParameters] = useState({
     gestationalAgeWeeks: '',
     birthWeightKg: '',
@@ -74,6 +72,31 @@ function AssessmentFormPage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [lastAssessment, setLastAssessment] = useState(null);
+  const [changedFields, setChangedFields] = useState(new Set());
+  const [autoFilled, setAutoFilled] = useState(false);
+
+  // ✅ FIX: Smart prefill when coming from baby history
+  useEffect(() => {
+    if (existingBaby) {
+      setSelectedBaby(existingBaby);
+      setBabyId(existingBaby.babyId);
+      setBabyType('existing');
+      setStep(3);
+      
+      // Smart prefill from last assessment
+      if (existingBaby.assessments && existingBaby.assessments.length > 0) {
+        const lastAssmt = existingBaby.assessments[0];
+        setLastAssessment(lastAssmt);
+        
+        const prefilledData = prefillFromLastAssessment(lastAssmt, existingBaby.babyInfo);
+        setHealthParameters(prefilledData);
+        setAutoFilled(true);
+        
+        console.log('✅ Auto-filled from last assessment:', lastAssmt.assessmentDate);
+      }
+    }
+  }, [existingBaby]);
 
   const handleBabyTypeSelect = (type) => {
     setBabyType(type);
@@ -85,6 +108,7 @@ function AssessmentFormPage() {
     }
   };
 
+  // ✅ FIX: Smart prefill when searching for baby
   const handleSearch = async () => {
     if (!searchId.trim()) {
       setSearchError('Please enter a Baby ID');
@@ -100,6 +124,19 @@ function AssessmentFormPage() {
       if (response.exists) {
         setSelectedBaby(response.data);
         setBabyId(response.data.babyId);
+        
+        // Smart prefill from last assessment
+        if (response.data.assessments && response.data.assessments.length > 0) {
+          const lastAssmt = response.data.assessments[0];
+          setLastAssessment(lastAssmt);
+          
+          const prefilledData = prefillFromLastAssessment(lastAssmt, response.data.babyInfo);
+          setHealthParameters(prefilledData);
+          setAutoFilled(true);
+          
+          console.log('✅ Auto-filled from last assessment:', lastAssmt.assessmentDate);
+        }
+        
         setStep(3);
       } else {
         setSearchError('Baby ID not found. Please check the ID or create a new baby.');
@@ -128,7 +165,6 @@ function AssessmentFormPage() {
     });
   };
 
-  // SIMPLIFIED: Just update value, no validation
   const handleHealthParamChange = (e) => {
     const { name, value } = e.target;
     
@@ -136,8 +172,18 @@ function AssessmentFormPage() {
       ...prev,
       [name]: value
     }));
+
+    // Track changes from last assessment
+    if (lastAssessment && lastAssessment.healthParameters[name] !== value) {
+      setChangedFields(prev => new Set([...prev, name]));
+    } else if (lastAssessment && lastAssessment.healthParameters[name] === value) {
+      setChangedFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(name);
+        return newSet;
+      });
+    }
     
-    // Clear any error for this field
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[name];
@@ -156,23 +202,21 @@ function AssessmentFormPage() {
       
       if (!parentInfo.motherName.trim()) parentErrors.motherName = "Mother's name is required";
       if (!parentInfo.contactNumber.trim()) {
-           parentErrors.contactNumber = 'Contact number is required';
-        } else {
+        parentErrors.contactNumber = 'Contact number is required';
+      } else {
         const phoneValidation = validateIndianPhone(parentInfo.contactNumber);
         if (!phoneValidation.isValid) {
-        parentErrors.contactNumber = phoneValidation.message;
+          parentErrors.contactNumber = phoneValidation.message;
+        }
       }
-    }
     }
     
     return { babyErrors, parentErrors };
   };
 
-  // SIMPLIFIED: Only check if fields are filled, not if values are valid
   const validateHealthParameters = () => {
     const paramErrors = {};
     
-    // List of all required health parameter fields
     const requiredFields = [
       'gestationalAgeWeeks', 'birthWeightKg', 'birthLengthCm', 'birthHeadCircumferenceCm',
       'ageDays', 'weightKg', 'lengthCm', 'headCircumferenceCm',
@@ -212,8 +256,6 @@ function AssessmentFormPage() {
     e.preventDefault();
     
     const paramErrors = validateHealthParameters();
-    
-   
 
     if (Object.keys(paramErrors).length > 0) {
       setErrors(paramErrors);
@@ -224,18 +266,17 @@ function AssessmentFormPage() {
     setIsSubmitting(true);
     
     try {
-
       const genderForPrediction = babyType === 'new' 
-      ? babyInfo.gender  
-      : selectedBaby?.babyInfo?.gender;
+        ? babyInfo.gender  
+        : selectedBaby?.babyInfo?.gender;
 
-       let formattedParentInfo = { ...parentInfo };
-        if (babyType === 'new' && parentInfo.contactNumber) {
-          const validation = validateIndianPhone(parentInfo.contactNumber);
-          if (validation.formatted) {
-            formattedParentInfo.contactNumber = validation.formatted;
-          }
+      let formattedParentInfo = { ...parentInfo };
+      if (babyType === 'new' && parentInfo.contactNumber) {
+        const validation = validateIndianPhone(parentInfo.contactNumber);
+        if (validation.formatted) {
+          formattedParentInfo.contactNumber = validation.formatted;
         }
+      }
 
       const assessmentData = {
         isNewBaby: babyType === 'new',
@@ -265,22 +306,21 @@ function AssessmentFormPage() {
           gender: genderForPrediction
         },
         doctorNotes: doctorNotes,
-          babyInfo: {
-        name: babyType === 'new' ? babyInfo.name : selectedBaby?.babyInfo?.name,
-        dateOfBirth: babyType === 'new' ? babyInfo.dateOfBirth : selectedBaby?.babyInfo?.dateOfBirth,
-        gender: genderForPrediction, // Use the same gender
-        bloodGroup: babyType === 'new' ? babyInfo.bloodGroup : selectedBaby?.babyInfo?.bloodGroup
-      },
-      // ✅ Include parentInfo for all assessments
-      parentInfo: babyType === 'new' 
-        ? formattedParentInfo 
-        : {
-            motherName: selectedBaby?.parentInfo?.motherName || '',
-            fatherName: selectedBaby?.parentInfo?.fatherName || '',
-            contactNumber: selectedBaby?.parentInfo?.contactNumber || '',
-            email: selectedBaby?.parentInfo?.email || '',
-            address: selectedBaby?.parentInfo?.address || ''
-          }
+        babyInfo: {
+          name: babyType === 'new' ? babyInfo.name : selectedBaby?.babyInfo?.name,
+          dateOfBirth: babyType === 'new' ? babyInfo.dateOfBirth : selectedBaby?.babyInfo?.dateOfBirth,
+          gender: genderForPrediction,
+          bloodGroup: babyType === 'new' ? babyInfo.bloodGroup : selectedBaby?.babyInfo?.bloodGroup
+        },
+        parentInfo: babyType === 'new' 
+          ? formattedParentInfo 
+          : {
+              motherName: selectedBaby?.parentInfo?.motherName || '',
+              fatherName: selectedBaby?.parentInfo?.fatherName || '',
+              contactNumber: selectedBaby?.parentInfo?.contactNumber || '',
+              email: selectedBaby?.parentInfo?.email || '',
+              address: selectedBaby?.parentInfo?.address || ''
+            }
       };
       
       if (babyType === 'new') {
@@ -296,7 +336,6 @@ function AssessmentFormPage() {
       setSubmitSuccess(true);
       
       setTimeout(() => {
-        
         const assessmentId = response.data.latestAssessment._id;
 
         navigate('/results', { 
@@ -323,6 +362,19 @@ function AssessmentFormPage() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // ✅ Function to copy all from last visit
+  const handleCopyFromLastVisit = () => {
+    if (lastAssessment && selectedBaby) {
+      const prefilledData = prefillFromLastAssessment(
+        lastAssessment, 
+        selectedBaby.babyInfo
+      );
+      setHealthParameters(prefilledData);
+      setChangedFields(new Set());
+      console.log('📋 Copied all data from last visit');
     }
   };
 
@@ -372,6 +424,9 @@ function AssessmentFormPage() {
     setDoctorNotes('');
     setErrors({});
     setSubmitSuccess(false);
+    setLastAssessment(null);
+    setChangedFields(new Set());
+    setAutoFilled(false);
   };
 
   return (
@@ -380,10 +435,9 @@ function AssessmentFormPage() {
     }}>
       <div className="max-w-7xl mx-auto px-4">
         
-        {/* Header with playful design */}
+        {/* Header */}
         <div className="mb-8">
           <button
-            //onClick={() => navigate('/HomePage')}
             onClick={() => navigate(from)}
             className="flex items-center text-purple-600 hover:text-purple-700 mb-4 transition-colors font-semibold"
           >
@@ -410,7 +464,7 @@ function AssessmentFormPage() {
           </div>
         </div>
 
-        {/* Success Message */}
+        {/* Success & Error Messages */}
         {submitSuccess && (
           <div className="mb-6 bg-gradient-to-r from-green-400 to-green-500 rounded-2xl shadow-xl p-6 flex items-center animate-pulse">
             <CheckCircle className="w-10 h-10 text-white mr-4" />
@@ -421,7 +475,6 @@ function AssessmentFormPage() {
           </div>
         )}
 
-        {/* Error Message */}
         {errors.submit && (
           <div className="mb-6 bg-gradient-to-r from-red-400 to-red-500 rounded-2xl shadow-xl p-6 flex items-center">
             <AlertCircle className="w-10 h-10 text-white mr-4" />
@@ -443,7 +496,6 @@ function AssessmentFormPage() {
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* New Baby Card */}
                 <button
                   onClick={() => handleBabyTypeSelect('new')}
                   className="group p-10 border-4 border-pink-300 hover:border-pink-500 rounded-3xl transition-all hover:shadow-2xl bg-gradient-to-br from-pink-50 to-pink-100 hover:from-pink-100 hover:to-pink-200 transform hover:scale-105"
@@ -459,7 +511,6 @@ function AssessmentFormPage() {
                   </div>
                 </button>
 
-                {/* Existing Baby Card */}
                 <button
                   onClick={() => handleBabyTypeSelect('existing')}
                   className="group p-10 border-4 border-blue-300 hover:border-blue-500 rounded-3xl transition-all hover:shadow-2xl bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transform hover:scale-105"
@@ -491,7 +542,6 @@ function AssessmentFormPage() {
                 <p className="text-gray-600 text-lg">Enter details for the new baby</p>
               </div>
 
-              {/* Baby ID Display */}
               <div className="mb-8 p-6 bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl border-4 border-purple-300 shadow-lg">
                 <label className="block text-lg font-bold text-purple-800 mb-3">
                   🆔 Baby ID (Auto-generated)
@@ -635,7 +685,47 @@ function AssessmentFormPage() {
                       </>
                     )}
                   </div>
+
+                    {autoFilled && selectedBaby && (
+                    <div className="mb-6 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (lastAssessment && selectedBaby) {
+                            const prefilledData = prefillFromLastAssessment(
+                              lastAssessment, 
+                              selectedBaby.babyInfo
+                            );
+                            setHealthParameters(prefilledData);
+                            setChangedFields(new Set());
+                          }
+                        }}
+                        className="flex items-center px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        <Copy className="w-5 h-5 mr-2" />
+                        Copy All from Last Visit
+                      </button>
+                    </div>
+                  )}
                   
+                    {/* ✅ ADD THIS SUCCESS MESSAGE TOO */}
+                  {autoFilled && lastAssessment && (
+                    <div className="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 border-3 border-green-400 rounded-2xl p-4 shadow-lg">
+                      <div className="flex items-center">
+                        <CheckCircle className="w-6 h-6 text-green-600 mr-3 flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-green-800 text-sm">
+                            ✓ Health parameters auto-filled from last visit ({new Date(lastAssessment.assessmentDate).toLocaleDateString()})
+                          </p>
+                          <p className="text-green-700 text-xs mt-1">
+                            Fields highlighted in blue have been updated. Click "Copy All from Last Visit" to reset.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+
                   {/* Enhanced Previous Assessments Display */}
                   {selectedBaby && selectedBaby.assessments && selectedBaby.assessments.length > 0 && (
                     <div className="mt-6 pt-6 border-t-4 border-purple-200">
@@ -1061,7 +1151,7 @@ function AssessmentFormPage() {
                     ) : (
                       <>
                         <Save className="w-6 h-6 mr-3" />
-                        Assess Health Risk
+                        {autoFilled ? `Save Assessment (${changedFields.size} changes)` : 'Assess Health Risk'}
                       </>
                     )}
                   </button>
